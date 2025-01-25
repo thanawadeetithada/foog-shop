@@ -1,0 +1,410 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff8dc;
+    margin: 0;
+    padding: 0;
+}
+
+.header {
+    background-color: #ffe600;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.product-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.product-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.product-info {
+    margin-top: 10px;
+}
+
+.sold-out {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 0, 0, 0.7);
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.add-product {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px;
+    background-color: #ffe600;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.product-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    position: relative;
+}
+
+.product-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.product-info {
+    margin-top: 10px;
+}
+
+.price, .rating {
+    display: block;
+    margin: 5px 0;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 20px;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #66bb6a;
+}
+
+input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
+.sold-out {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 0, 0, 0.8);
+    color: #fff;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+.add-product-container {
+    text-align: center; /* จัดให้อยู่ตรงกลาง */
+    margin-top: 20px;
+}
+
+.add-product {
+    display: inline-block; /* ทำให้ปุ่มเป็นบล็อกขนาดตามเนื้อหา */
+    text-decoration: none; /* ลบเส้นขีดใต้ข้อความ */
+    background-color: #ffe600;
+    color: #000;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* เพิ่มเงาเพื่อให้ปุ่มดูโดดเด่น */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* เพิ่มเอฟเฟกต์ */
+}
+
+.add-product:hover {
+    background-color: #ffd200; /* เปลี่ยนสีเมื่อชี้ */
+    transform: scale(1.05); /* ขยายเล็กน้อยเมื่อชี้ */
+}
+/* ปรับแต่งฟอร์มค้นหา */
+.header form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+/* ปรับแต่งช่องกรอกข้อความ */
+.header input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    width: 250px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* เมื่อช่องกรอกข้อความได้รับการโฟกัส */
+.header input[type="text"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+}
+
+/* ปรับแต่งปุ่มค้นหา */
+.header button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    margin-left: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* เมื่อวางเมาส์บนปุ่มค้นหา */
+.header button:hover {
+    background-color: #0056b3;
+}
+
+/* เพิ่มเอฟเฟกต์เมื่อกดปุ่ม */
+.header button:active {
+    background-color: #004085;
+    transform: scale(0.98);
+}
+.hidden {
+    display: none;
+}
+
+.edit-form input[type="text"],
+.edit-form input[type="number"],
+.edit-form input[type="file"],
+.edit-form button {
+    width: calc(100% - 20px);
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.edit-form button {
+    width: auto;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.edit-form button:hover {
+    background-color: #0056b3;
+}
+
+.edit-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.edit-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 15px; /* ขนาด padding แบบสี่เหลี่ยม */
+    background: linear-gradient(45deg, #007BFF, #0056b3);
+    color: #fff;
+    border: none;
+    border-radius: 5px; /* มุมมนเล็กน้อย */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(45deg, #0056b3, #007BFF); /* เปลี่ยนสีเมื่อ hover */
+}
+
+
+
+.edit-button:active {
+    background: linear-gradient(45deg, #004085, #0056b3);
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.product-card {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+    transition: box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-btn,
+.delete-button {
+    margin-top: 10px;
+    padding: 5px 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.edit-button {
+    background-color: #007BFF;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    background-color: #FF4D4D;
+}
+
+.delete-button:hover {
+    background-color: #FF0000;
+}
+
+.hidden {
+    display: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+.modal {
+    display: none; /* ซ่อน Modal */
+    position: fixed; /* ติดกับหน้าจอ */
+    z-index: 1; /* วางให้อยู่ด้านบน */
+    left: 0;
+    top: 0;
+    width: 100%; /* ความกว้างเต็มหน้าจอ */
+    height: 100%; /* ความสูงเต็มหน้าจอ */
+    background-color: rgba(0, 0, 0, 0.5); /* สีพื้นหลังของ Modal */
+}
+
+.modal-content {
+    background-color: #f9f9f9;
+    margin: 15% auto; /* จัดให้อยู่กลางหน้าจอ */
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%; /* ความกว้างของฟอร์ม */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal .close-btn {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.modal .close-btn:hover,
+.modal .close-btn:focus {
+    color: black;
+    text-decoration: none;
+}
+
+/* ฟอร์มตกแต่ง */
+.modal form {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal form input,
+.modal form select,
+.modal form button {
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.modal form button {
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.submit-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.submit-btn:hover {
+    background-color: #218838;
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #c82333;
+}

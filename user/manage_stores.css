@@ -1,0 +1,142 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+}
+
+/* Header Styling */
+.header {
+    background-color: #FFD400;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header input {
+    border: none;
+    padding: 10px;
+    border-radius: 20px;
+    width: 70%;
+    font-size: 14px;
+}
+
+.header .user-icon {
+    height: 30px;
+    cursor: pointer;
+}
+
+.banner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 20px;
+}
+
+.banner-img {
+    width: 100%; /* ปรับขนาดให้เต็มความกว้าง */
+    max-height: 200px; /* กำหนดความสูงสูงสุด */
+    object-fit: contain; /* ใช้ contain เพื่อไม่ให้รูปภาพยืด */
+    border-radius: 10px; /* กำหนดมุมโค้ง */
+}
+
+
+
+/* Categories */
+.categories {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    background-color: #ffeb99;
+  }
+  
+  .categories button {
+    background: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.9em;
+    cursor: pointer;
+  }
+
+.category {
+    text-align: center;
+}
+
+.category img {
+    width: 50px;
+    height: 50px;
+}
+
+.category p {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Recommended Shops Section */
+.recommended {
+    margin: 20px;
+}
+
+.recommended h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.recommended .shops {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.shop {
+    text-align: center;
+    background: #f9f9f9;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer Section */
+.footer {
+    background-color: #FFD400;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer div {
+    text-align: center;
+}
+
+.footer img {
+    width: 30px;
+}
+
+.footer p {
+    margin-top: 5px;
+    font-size: 12px;
+}
+  
+  /* Footer */
+  .footer {
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .footer button {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+  }
+

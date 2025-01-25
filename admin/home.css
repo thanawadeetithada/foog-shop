@@ -1,0 +1,193 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+}
+
+.container {
+  width: 100%;
+  max-width: 100%; /* เปลี่ยนจาก max-width: 375px ให้เต็มหน้าจอ */
+  margin: 0 auto;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 10px; /* เพิ่ม padding สำหรับระยะห่างจากขอบ */
+}
+
+.header {
+  background-color: #ffd700;
+  text-align: center;
+  padding: 15px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.store-id {
+  font-size: 12px;
+  color: #666;
+}
+
+.profile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.edit-btn {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.order-status {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  flex-wrap: wrap; /* ให้สามารถเรียงในหลายแถวได้ */
+}
+
+.status-item {
+  text-align: center;
+  width: 30%; /* ปรับขนาดให้อยู่ใน 3 คอลัมน์ */
+  margin-bottom: 10px; /* ให้มีช่องว่างระหว่างแถว */
+}
+
+.status-number {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.status-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.sales-summary {
+  padding: 15px;
+}
+
+.sales-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+}
+
+.sales-amount {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.amount {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.sales-chart {
+  background-color: #e0f7fa;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.bar-chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 100px;
+}
+
+.bar {
+  width: 20px;
+  background-color: #00bcd4;
+  border-radius: 5px;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-around;
+  background-color: #fff;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+}
+
+.menu-item {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.menu-item.active {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+
+@media (max-width: 768px) { /* เมื่อหน้าจอมีความกว้างน้อยกว่าหรือเท่ากับ 768px (สำหรับมือถือ) */
+  .order-status {
+      flex-direction: column; /* จัดเรียงแนวตั้ง */
+      align-items: center;
+  }
+
+  .header {
+      font-size: 18px;
+      padding: 10px;
+  }
+
+  .order-status {
+      flex-direction: column; /* จัดให้แสดงในแนวตั้ง */
+      align-items: center;
+  }
+
+  .profile {
+      flex-direction: column; /* จัดให้แสดงในแนวตั้ง */
+      align-items: center;
+  }
+
+  .sales-header {
+      font-size: 16px;
+  }
+
+  .sales-amount {
+      font-size: 14px;
+  }
+
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    z-index: 1000;
+}
+
+.menu-item {
+    display: inline-block;
+    font-size: 14px;
+    color: #666;
+    margin-right: 10px;
+}
+
+.menu-item.active {
+    font-weight: bold;
+    color: #ffd700;
+}
+
+.menu-item a {
+    text-decoration: none;
+    color: #666;
+}
+
+}

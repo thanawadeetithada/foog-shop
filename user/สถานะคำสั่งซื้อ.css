@@ -1,0 +1,117 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.header {
+    background-color: #ffd700;
+    color: #333;
+    padding: 10px;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.order {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.order:last-child {
+    border-bottom: none;
+}
+
+.order-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-status span {
+    font-size: 1em;
+}
+
+.status {
+    font-weight: bold;
+}
+
+.status.pending {
+    color: orange;
+}
+
+.status.completed {
+    color: green;
+}
+
+.details {
+    padding: 15px;
+    font-size: 0.9em;
+}
+
+.details strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.reorder-button {
+    display: block;
+    text-align: center;
+    background-color: #ffd700;
+    color: #333;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 15px auto 0;
+    max-width: 200px;
+}
+
+.reorder-button:hover {
+    background-color: #ffc107;
+}
+
+.step {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+}
+
+.step .circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #ddd;
+}
+
+.step .circle.active {
+    background-color: green;
+}
+
+.step .line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #ddd;
+    margin: 0 10px;
+}
+
+.step .line.active {
+    background-color: green;
+}
+.status.pending {
+    color: orange;
+}
+.status.completed {
+    color: green;
+}
