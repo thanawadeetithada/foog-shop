@@ -1,19 +1,6 @@
 <?php
 session_start();
-
-// ส่วนที่เชื่อมต่อกับฐานข้อมูล
-$host = 'localhost'; // เซิร์ฟเวอร์ฐานข้อมูล
-$dbname = 'store_management'; // ชื่อฐานข้อมูล
-$username = 'root'; // ชื่อผู้ใช้ฐานข้อมูล
-$password = ''; // รหัสผ่านฐานข้อมูล
-
-// สร้างการเชื่อมต่อกับฐานข้อมูล
-$conn = new mysqli($host, $username, $password, $dbname);
-
-// ตรวจสอบการเชื่อมต่อ
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require 'db_connection.php';
 
 // ตรวจสอบการส่งข้อมูล
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -40,24 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // ตรวจสอบและย้ายไฟล์ไปยังโฟลเดอร์ที่กำหนด
             if (move_uploaded_file($file['tmp_name'], $upload_path)) {
-                $user_id = 1; // เปลี่ยนเป็น user_id จริงจาก session
-                $amount = 60.00; // กำหนดจำนวนเงิน
-                $payment_status = 'confirmed'; // กำหนดสถานะเป็น "confirmed"
+                $success_message = "อัปโหลดหลักฐานการชำระเงินสำเร็จ!";
+                // คุณสามารถบันทึกข้อมูลไฟล์ลงฐานข้อมูลที่นี่ได้ หากต้องการ
+                // ตัวอย่าง: INSERT INTO payment_proofs (user_id, file_name, upload_time) VALUES (...)
 
-                // บันทึกข้อมูลไฟล์และสถานะลงในฐานข้อมูล
-                if ($stmt = $conn->prepare("INSERT INTO payment_proofs (user_id, file_name, amount, payment_status) VALUES (?, ?, ?, ?)")) {
-                    $stmt->bind_param("isds", $user_id, $file_name, $amount, $payment_status);
-
-                    if ($stmt->execute()) {
-                        $success_message = "อัปโหลดหลักฐานการชำระเงินสำเร็จ!";
-                    } else {
-                        $error_message = "เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $stmt->error;
-                    }
-                } else {
-                    $error_message = "เกิดข้อผิดพลาดในการเตรียมคำสั่ง SQL: " . $conn->error;
-                }
-
-                header("Location: thank_you.php");
+                header("Location: thank_you.php"); // เปลี่ยนเส้นทางไปยังหน้า 'thank you'
                 exit;
             } else {
                 $error_message = "ไม่สามารถอัปโหลดไฟล์ได้";
@@ -75,32 +49,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>อัปโหลดหลักฐานการชำระเงิน</title>
-    <link rel="stylesheet" href="payment_confirmation.css">
+    <style>
+     .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.container {
+    margin-top: 5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 60px;
+}
+    h3 {
+        text-align: center;
+    }
+    label {
+        margin: 20px 10px 10px 10px;
+        text-align: center;
+    }
+    form {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+    form input {
+        margin: 10px 25px;
+    }
+
+    form button {
+    padding: 10px 20px;
+    background-color: #FDDF59;
+    color: black;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+}
+
+    </style>
 </head>
 <body>
+<div class="top-tab"></div>
     <div class="container">
-        <h1>อัปโหลดหลักฐานการชำระเงิน</h1>
-
-        <!-- แสดงข้อความแจ้งเตือน -->
+        <h3>ข้อมูลการชำระเงิน</h3>
         <?php if (!empty($error_message)): ?>
             <p style="color: red;"><?php echo htmlspecialchars($error_message); ?></p>
         <?php elseif (!empty($success_message)): ?>
             <p style="color: green;"><?php echo htmlspecialchars($success_message); ?></p>
         <?php endif; ?>
 
-        <!-- ส่วนแสดง QR Code -->
+        <!-- ส่วนแสดง QR Code สำหรับการชำระเงิน -->
         <div class="payment-section">
-            <h2>กรุณาชำระเงิน</h2>
             <img src="จ่ายเงิน.jpg" alt="QR Code สำหรับการชำระเงิน" style="max-width: 300px; display: block; margin: 0 auto;">
-            <p style="text-align: center;">สแกน QR Code เพื่อชำระเงิน</p>
         </div>
 
-        <!-- ฟอร์มอัปโหลด -->
+        <!-- ฟอร์มสำหรับอัปโหลดไฟล์ -->
         <form action="payment_confirmation.php" method="post" enctype="multipart/form-data">
-            <label for="payment_proof">แนบหลักฐานการชำระเงิน (JPEG, PNG):</label>
+            <label for="payment_proof">หากชำระเรียบร้อยแล้ว โปรดแนบหลักฐานการชำระเงิน</label>
             <input type="file" name="payment_proof" id="payment_proof" required>
+           <br>
             <button type="submit">ยืนยันการชำระเงิน</button>
         </form>
     </div>
 </body>
 </html>
+

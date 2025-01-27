@@ -24,11 +24,142 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สถานะคำสั่งซื้อ</title>
-    <link rel="stylesheet" href="สถานะคำสั่งซื้อ.css">
+    <!-- <link rel="stylesheet" href="สถานะคำสั่งซื้อ.css"> -->
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #fff;
+    overflow: hidden;
+    margin-bottom: 20px;
+    height: 100vh;
+}
+
+.header {
+    margin-top: 5rem;
+    color: #333;
+    padding: 10px 10px 10px 2rem;
+    font-size: 1.5em;
+}
+
+.order {
+    padding: 15px 30px 15px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.order:last-child {
+    border-bottom: none;
+}
+
+.order-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-status span {
+    padding-left: 15px;
+    padding-top: 15px;
+    font-size: 1rem;
+}
+
+.status {
+    font-weight: bold;
+}
+
+.status.pending {
+    color: orange;
+}
+
+.status.completed {
+    color: green;
+}
+
+.details {
+    padding: 15px;
+    font-size: 0.9em;
+}
+
+.details strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.reorder-button {
+    display: block;
+    text-align: center;
+    background-color: #ffd700;
+    color: #333;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 15px auto 0;
+    max-width: 200px;
+}
+
+.reorder-button:hover {
+    background-color: #ffc107;
+}
+
+.step {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+}
+
+.step .circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #ddd;
+}
+
+.step .circle.active {
+    background-color: green;
+}
+
+.step .line {
+    flex-grow: 1;
+    height: 2px;
+    background-color: #ddd;
+    margin: 0 10px;
+}
+
+.step .line.active {
+    background-color: green;
+}
+.status.pending {
+    color: orange;
+}
+.status.completed {
+    color: green;
+}
+
+   .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+   </style>
 </head>
 <body>
     <!-- หน้า 1 -->
     <div class="container">
+    <div class="top-tab"></div>
+
         <div class="header">รายการคำสั่งซื้อ</div>
         <?php
         if ($result->num_rows > 0) {
@@ -38,10 +169,10 @@ $result = $conn->query($sql);
                 echo '<div class="order">';
                 echo '<div class="order-status">';
                 echo '<span>' . date("d M Y, H:i", strtotime($row["created_at"])) . '</span>';
-                echo '<span class="status ' . $status_class . '">' . $row["status"] . '</span>';
+                echo '<span><strong>Order: ' . $row["id"] . '</strong></span>';
                 echo '</div>';
                 echo '<div class="details">';
-                echo '<strong>Order: ' . $row["id"] . '</strong>';
+             
                 echo '<p>ยอดชำระ: ' . number_format($row["total_price"], 2) . '฿</p>';
                 echo '</div>';
                 echo '</div>';
