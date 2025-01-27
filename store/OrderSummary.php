@@ -31,9 +31,24 @@ $result = $conn->query($sql);
         .status { color: #fff; background-color: #28a745; padding: 5px 10px; border-radius: 5px; font-size: 14px; font-weight: bold; }
         .btn-complete { background-color: #007bff; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
         .btn-complete:hover { background-color: #0056b3; }
+        .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+    .container {
+        margin-top: 4rem;
+    }
+
     </style>
 </head>
 <body>
+<div class="top-tab"></div>
+
     <div class="container">
         <h1>รายการออเดอร์</h1>
         <?php if ($result->num_rows > 0): ?>

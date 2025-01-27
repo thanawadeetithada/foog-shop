@@ -46,196 +46,330 @@ if ($store) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สินค้า</title>
-    <link rel="stylesheet" href="แสดงสินค้าา.css">
-    <script src="script.js" defer></script>
-    <script>
-        function showSuccessMessage(message) {
-            const messageBox = document.createElement("div");
-            messageBox.textContent = message;
-            messageBox.style.position = "fixed";
-            messageBox.style.top = "10%";
-            messageBox.style.left = "50%";
-            messageBox.style.transform = "translateX(-50%)";
-            messageBox.style.padding = "20px 30px";
-            messageBox.style.backgroundColor = "#4CAF50";
-            messageBox.style.color = "white";
-            messageBox.style.borderRadius = "10px";
-            messageBox.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.2)";
-            messageBox.style.textAlign = "center";
-            messageBox.style.fontSize = "18px";
-            messageBox.style.zIndex = "1000";
-            document.body.appendChild(messageBox);
 
-            setTimeout(() => {
-                messageBox.remove();
-            }, 3000);
-        }
-
-        // ฟังก์ชันคำนวณราคาใหม่เมื่อเลือกตัวเลือก
-        function updatePrice(originalPrice, productId) {
-            const priceField = document.getElementById('price-' + productId); // ใช้ productId แทน
-            const specialOption = document.querySelector('input[name="special_option_' + productId + '"]:checked').value;
-
-            if (specialOption === 'special') {
-                priceField.value = (originalPrice + 10).toFixed(2); // เพิ่ม 10 บาท
-            } else {
-                priceField.value = originalPrice.toFixed(2); // คืนค่าราคาเดิม
-            }
-        }
-
-        function showEditForm(productId) {
-            var modal = document.getElementById('editModal-' + productId);
-            modal.style.display = "block";
-        }
-
-        function closeEditForm(productId) {
-            var modal = document.getElementById('editModal-' + productId);
-            modal.style.display = "none";
-        }
-
-        // เมื่อคลิกนอก Modal ให้ปิด Modal
-        window.onclick = function(event) {
-            var modals = document.getElementsByClassName("modal");
-            for (var i = 0; i < modals.length; i++) {
-                if (event.target == modals[i]) {
-                    modals[i].style.display = "none";
-                }
-            }
-        }
-
-        // ฟังก์ชันเปลี่ยนสถานะสินค้า
-        function toggleStatus(productId) {
-            const checkbox = document.querySelector(`.toggle-status[data-id='${productId}']`);
-            const isAvailable = checkbox.checked ? 1 : 0;
-            const soldOutLabel = document.querySelector(`.sold-out[data-id='${productId}']`);
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "update_status.php", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    showSuccessMessage("สถานะเปลี่ยนแล้ว");
-                    if (isAvailable) {
-                        if (soldOutLabel) {
-                            soldOutLabel.remove();
-                        }
-                    } else {
-                        if (!soldOutLabel) {
-                            const newSoldOutLabel = document.createElement("div");
-                            newSoldOutLabel.className = "sold-out";
-                            newSoldOutLabel.setAttribute("data-id", productId);
-                            newSoldOutLabel.textContent = "SOLD OUT";
-                            checkbox.closest(".product-display").appendChild(newSoldOutLabel);
-                        }
-                    }
-                }
-            };
-            xhr.send(`id=${productId}&is_available=${isAvailable}`);
-        }
+    <title>หน้าสินค้า</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous">
     </script>
+
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+
+    .header {
+        background-color: #FFD400;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .header form {
+        margin: 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 80%;
+    }
+
+    .header input {
+        border: none;
+        padding: 10px;
+        border-radius: 20px;
+        width: 70%;
+        font-size: 14px;
+    }
+
+    .header .user-icon {
+        height: 30px;
+        cursor: pointer;
+    }
+
+    .banner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px 20px;
+    }
+
+    .banner-img {
+        width: 100%;
+        /* ปรับขนาดให้เต็มความกว้าง */
+        max-height: 200px;
+        /* กำหนดความสูงสูงสุด */
+        object-fit: contain;
+        /* ใช้ contain เพื่อไม่ให้รูปภาพยืด */
+        border-radius: 10px;
+        /* กำหนดมุมโค้ง */
+    }
+
+    .categories {
+        display: flex;
+        justify-content: space-around;
+        padding: 10px;
+        background-color: #ffeb99;
+    }
+
+    .category {
+        text-align: center;
+    }
+
+    .category button {
+        background: #fff;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-size: 1.5em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        height: 80px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .category button i {
+        font-size: 2rem;
+        /* ขนาดไอคอน */
+        color: #333;
+    }
+
+    .category p {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .categories button svg {
+        font-size: 2rem;
+        color: #333;
+    }
+
+    .category {
+        text-align: center;
+    }
+
+    .category img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .category p {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    /* Recommended Shops Section */
+    .recommended {
+        margin: 20px;
+    }
+
+    .recommended h3 {
+        margin-bottom: 10px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .recommended .shops {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .shop {
+        text-align: center;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+    }
+
+    .shop img {
+        width: 100%;
+        max-width: 250px;
+        height: auto;
+        border-radius: 10px;
+    }
+
+    /* Footer Section */
+    .footer {
+        align-items: center;
+        display: flex;
+        justify-content: space-around;
+        background-color: #fff;
+        padding: 5px 0;
+        margin-left: 20px;
+        position: fixed;
+        bottom: 0;
+        margin-bottom: 20px;
+        width: 90%;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 100px;
+    }
+    .footer-item {
+    text-align: center;
+    color: #FFD400;
+    font-size: 1.5rem;
+    position: relative;
+    cursor: pointer;
+}
+
+.footer-item p {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 5px 0 0;
+}
+
+.footer-item.active {
+    background-color: #FFD400;
+    border-radius: 100px;
+    padding: 10px 20px;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+    .footer div {
+        text-align: center;
+    }
+
+    .footer img {
+        width: 30px;
+    }
+
+    .footer p {
+        margin-top: 5px;
+        font-size: 12px;
+    }
+
+    .footer button {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        cursor: pointer;
+    }
+
+    .search-form {
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        position: relative;
+        border-radius: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        overflow: hidden;
+    }
+
+    .search-box input {
+        flex: 1;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        outline: none;
+    }
+
+    .search-box button {
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 10px 15px;
+        color: #555;
+    }
+
+    .search-box button i {
+        font-size: 16px;
+    }
+    </style>
 </head>
+
 <body>
-<?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            showSuccessMessage("ดำเนินการสำเร็จ!");
-        });
-    </script>
-<?php endif; ?>
-<div class="header">
-    <form method="POST" action="">
-        <input type="text" name="search" placeholder="ค้นหา" value="<?php echo htmlspecialchars($search); ?>">
-        <button type="submit">ค้นหา</button>
-    </form>
-</div>
-<h2>สินค้าทั้งหมด</h2>
-<div class="product-grid">
-    <?php if ($result): ?>
-        <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="product-card">
-                <div class="product-display">
-                    <img src="uploads/<?php echo $row['image']; ?>" alt="<?php echo htmlspecialchars($row['name']); ?>">
-                    <div class="product-info">
-                        <h3><?php echo htmlspecialchars($row['name']); ?></h3>
-                        <span class="price"><?php echo number_format($row['price'], 2); ?>฿</span>
-                        <label class="switch">
-                            <input type="checkbox" class="toggle-status" data-id="<?php echo $row['id']; ?>" <?php echo $row['is_available'] ? 'checked' : ''; ?> onclick="toggleStatus(<?php echo $row['id']; ?>)">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <?php if (!$row['is_available']): ?>
-                        <div class="sold-out" data-id="<?php echo $row['id']; ?>">SOLD OUT</div>
-                    <?php endif; ?>
-                    <button type="button" class="edit-btn" onclick="showEditForm(<?php echo $row['id']; ?>)">แก้ไข</button>
-                    <!-- ปุ่มลบสินค้า -->
-                    <form action="delete_product.php" method="POST" class="delete-form">
-                        <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-                        <button type="submit" class="delete-button">ลบ</button>
-                    </form>
-                </div>
-
-                <!-- ฟอร์มแก้ไขสินค้า Modal -->
-                <div id="editModal-<?php echo $row['id']; ?>" class="modal">
-                    <div class="modal-content">
-                        <span class="close-btn" onclick="closeEditForm(<?php echo $row['id']; ?>)">&times;</span>
-
-                        <!-- ฟอร์มแก้ไขสินค้า -->
-                        <form action="edit_product.php" method="POST" enctype="multipart/form-data">
-                            <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
-
-                            <!-- ชื่อสินค้า -->
-                            <label for="name-<?php echo $row['id']; ?>">ชื่อสินค้า:</label>
-                            <input type="text" id="name-<?php echo $row['id']; ?>" name="name" value="<?php echo htmlspecialchars($row['name']); ?>" required>
-
-                            <!-- ราคา -->
-                            <label for="price-<?php echo $row['id']; ?>">ราคา (บาท):</label>
-                            <input type="number" id="price-<?php echo $row['id']; ?>" name="price" value="<?php echo $row['price']; ?>" step="0.01" required>
-
-                            <!-- หมวดหมู่ -->
-                            <label for="category-<?php echo $row['id']; ?>">หมวดหมู่:</label>
-                            <select id="category-<?php echo $row['id']; ?>" name="category" required>
-                                <option value="อาหาร" <?php echo ($row['category'] == 'อาหาร') ? 'selected' : ''; ?>>อาหาร</option>
-                                <option value="เครื่องดื่ม" <?php echo ($row['category'] == 'เครื่องดื่ม') ? 'selected' : ''; ?>>เครื่องดื่ม</option>
-                                <option value="ของทานเล่น" <?php echo ($row['category'] == 'ของทานเล่น') ? 'selected' : ''; ?>>ของทานเล่น</option>
-                            </select>
-
-                            <!-- ตัวเลือกพิเศษ/ปกติ -->
-                            <label for="special-option-<?php echo $row['id']; ?>">ตัวเลือก:</label>
-                            <div class="special-option-group">
-                                <label>
-                                    <input type="radio" name="special_option" value="normal" <?php echo ($row['special_option'] == 'normal') ? 'checked' : ''; ?>>
-                                    ปกติ
-                                </label>
-                                <label>
-                                    <input type="radio" name="special_option" value="special" <?php echo ($row['special_option'] == 'special') ? 'checked' : ''; ?>>
-                                    พิเศษ (+10 บาท)
-                                </label>
-                            </div>
-
-                            <!-- รูปภาพสินค้า -->
-                            <label for="image-<?php echo $row['id']; ?>">รูปภาพสินค้า:</label>
-                            <input type="file" id="image-<?php echo $row['id']; ?>" name="image" accept="image/*">
-
-                            <!-- ปุ่มบันทึก -->
-                            <button type="submit" class="submit-btn">บันทึก</button>
-                            <button type="button" class="cancel-btn" onclick="closeEditForm(<?php echo $row['id']; ?>)">ยกเลิก</button>
-                        </form>
-                    </div>
-                </div>
+    <!-- Header Section -->
+    <div class="header">
+        <form method="GET" action="search.php" class="search-form">
+            <div class="search-box">
+                <input type="text" name="query" placeholder="ค้นหาสินค้า"
+                    value="<?php echo isset($_GET['query']) ? htmlspecialchars($_GET['query']) : ''; ?>">
+                <button type="submit"><i class="fas fa-search"></i></button>
             </div>
-        <?php endwhile; ?>
-    <?php else: ?>
-        <p>ไม่พบสินค้า</p>
-    <?php endif; ?>
-</div>
-<div class="add-product-container">
-    <a href="add_product.php" class="add-product">เพิ่มสินค้าใหม่</a>
-</div>
+        </form>
+    </div>
+
+    <!-- Banner Section -->
+    <div class="banner">
+        <img src="RMUTP FOOD.jpg" alt="RMUTP Food" class="banner-img">
+    </div>
+
+    <!-- Categories Section -->
+    <nav class="categories">
+        <div class="category">
+            <button><i class="fa-solid fa-utensils"></i></button>
+            <p>อาหาร</p>
+        </div>
+        <div class="category">
+            <button><i class="fa-solid fa-mug-hot"></i></button>
+            <p>เครื่องดื่ม</p>
+        </div>
+        <div class="category">
+            <button><i class="fa-solid fa-ice-cream"></i></button>
+            <p>ของทานเล่น</p>
+        </div>
+        <div class="category">
+            <button><i class="fa-solid fa-table-cells-large"></i></button>
+            <p>อื่นๆ</p>
+        </div>
+    </nav>
+
+   
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="footer-item active">
+            <i class="fa-solid fa-house-chimney"></i>&nbsp;
+            <p>HOME</p>
+        </div>
+        <div class="footer-item">
+            <i class="fa-solid fa-file-alt"></i>
+        </div>
+        <div class="footer-item">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div class="footer-item notification">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
+        </div>
+    </footer>
 </body>
+
 </html>

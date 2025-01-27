@@ -75,16 +75,27 @@ $result = $conn->query($sql);
             margin: 0 auto;
             padding: 20px;
             font-family: Arial, sans-serif;
+            margin-top: 4rem;
         }
 
         .header {
             font-size: 24px;
             margin-bottom: 20px;
-            text-align: center;
         }
+        .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
     </style>
 </head>
 <body>
+<div class="top-tab"></div>
+
     <div class="container">
         <div class="header">รายการสินค้าในตะกร้า</div>
         <?php

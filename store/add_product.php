@@ -85,13 +85,145 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เพิ่มสินค้า</title>
-    <link rel="stylesheet" href="เพิ่มสินค้า1.css">
+    <!-- <link rel="stylesheet" href="เพิ่มสินค้า1.css"> -->
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #f9f9f9, #e0e0e0);
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    text-align: center;
+    /* margin-top: 20px; */
+    color: black;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: #fff;
+}
+
+.form label {
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: black;
+}
+
+.form input[type="text"],
+.form input[type="number"],
+.form input[type="file"],
+.form select {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+}
+
+.form button {
+    background-color: #02BF63;
+    color: black;
+    border: none;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form button:hover {
+    background-color: #02BF63;
+}
+
+.back-button {
+    font-size: 18px;
+    display: block;
+    text-align: center;
+    margin: 20px auto;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    background-color: #E83024;
+    padding: 12px 20px;
+    border-radius: 15px;
+    width: 90%;
+}
+
+.back-button:hover {
+    background-color: #E83024;
+}
+
+#popup {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #FFC107;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    z-index: 1000;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+    .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .container {
+        padding-top: 5rem;
+         height: 100vh;
+         background: #fff;
+    }
+    </style>
 </head>
+
 <body>
+    <div class="top-tab"></div>
+
+    <div class="container">
     <h2>เพิ่มสินค้าใหม่</h2>
     <form action="add_product.php" method="POST" enctype="multipart/form-data" class="form">
         <label for="store_id">เลือกร้านค้า:</label>
@@ -129,22 +261,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <label for="image">รูปภาพสินค้า:</label>
         <input type="file" id="image" name="image" accept="image/*" required>
 
-        <button type="submit">บันทึกสินค้า</button>
+        <button type="submit">บันทึก</button>
+        <a href="หน้าแสดงสินค้า.php?store_id=<?php echo isset($_POST['store_id']) ? $_POST['store_id'] : ''; ?>"
+        class="back-button">ยกเลิก</a>
+        </div>
     </form>
 
     <!-- Popup message -->
     <div id="popup-overlay"></div>
     <div id="popup">เพิ่มสินค้าเรียบร้อย!</div>
 
-    <a href="หน้าแสดงสินค้า.php?store_id=<?php echo isset($_POST['store_id']) ? $_POST['store_id'] : ''; ?>" class="back-button">กลับไปหน้าหลัก</a>
-
+    
     <script>
-        // ปิด Popup เมื่อคลิกที่ overlay
-        document.getElementById('popup-overlay').onclick = function() {
-            document.getElementById('popup').style.display = 'none';
-            document.getElementById('popup-overlay').style.display = 'none';
-        }
+    // ปิด Popup เมื่อคลิกที่ overlay
+    document.getElementById('popup-overlay').onclick = function() {
+        document.getElementById('popup').style.display = 'none';
+        document.getElementById('popup-overlay').style.display = 'none';
+    }
     </script>
 
 </body>
+
 </html>

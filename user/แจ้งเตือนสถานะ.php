@@ -30,70 +30,84 @@ $result = $conn->query($sql);
 
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายการออเดอร์</title>
     <style>
-        .order-item {
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            position: relative;
-        }
+    .order-item {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        position: relative;
+    }
 
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
+    .item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
 
-        .status {
-            color: #fff;
-            background-color: #28a745;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: bold;
-        }
+    .status {
+        color: #fff;
+        background-color: #28a745;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: bold;
+    }
 
-        .item-details {
-            margin-top: 10px;
-        }
+    .item-details {
+        margin-top: 10px;
+    }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-        }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        margin-top: 4rem;
+    }
 
-        .header {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+    .header {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
 
-        .btn-complete {
-            display: inline-block;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    .btn-complete {
+        display: inline-block;
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
 
-        .btn-complete:hover {
-            background-color: #218838;
-        }
+    .btn-complete:hover {
+        background-color: #218838;
+    }
+
+    .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
     </style>
 </head>
+
 <body>
+    <div class="top-tab"></div>
+
     <div class="container">
         <div class="header">แจ้งเตือนสถานะ</div>
         <?php
@@ -121,33 +135,36 @@ $result = $conn->query($sql);
         ?>
     </div>
 
- <script>
+    <script>
     function markComplete(cartId) {
-    if (confirm('คุณต้องการเปลี่ยนสถานะเป็น "Preparing" หรือไม่?')) {
-        fetch('update_status.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ cart_id: cartId, status: 'Preparing' })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('สถานะอัปเดตเรียบร้อยแล้ว!');
-                window.location.href = 'home.php'; // เปลี่ยนไปหน้า home.php
-            } else {
-                alert('เกิดข้อผิดพลาด: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
-        });
+        if (confirm('คุณต้องการเปลี่ยนสถานะเป็น "Preparing" หรือไม่?')) {
+            fetch('update_status.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cart_id: cartId,
+                        status: 'Preparing'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('สถานะอัปเดตเรียบร้อยแล้ว!');
+                        window.location.href = 'home.php'; // เปลี่ยนไปหน้า home.php
+                    } else {
+                        alert('เกิดข้อผิดพลาด: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+                });
+        }
     }
-}
-
-</script>
+    </script>
 
 </body>
+
 </html>
