@@ -1,28 +1,15 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "food_shop";
 
-try {
-    $conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-    if ($conn->connect_error) {
-        throw new Exception("Connection failed: " . $conn->connect_error);
-    }
-
-    if (!$conn->set_charset("utf8")) {
-        throw new Exception("Error setting charset: " . $conn->error);
-    }
-
-} catch (Exception $e) {
-    die("Database connection error: " . $e->getMessage());
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+$conn->set_charset("utf8mb4");
+
 ?>

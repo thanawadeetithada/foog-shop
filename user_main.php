@@ -56,13 +56,9 @@
 
     .banner-img {
         width: 100%;
-        /* ปรับขนาดให้เต็มความกว้าง */
         max-height: 200px;
-        /* กำหนดความสูงสูงสุด */
         object-fit: contain;
-        /* ใช้ contain เพื่อไม่ให้รูปภาพยืด */
         border-radius: 10px;
-        /* กำหนดมุมโค้ง */
     }
 
     .categories {
@@ -297,7 +293,7 @@
 
     <!-- Banner Section -->
     <div class="banner">
-        <img src="RMUTP FOOD.jpg" alt="RMUTP Food" class="banner-img">
+        <img src="img/RMUTPFOOD.jpg" alt="RMUTP Food" class="banner-img">
     </div>
 
     <!-- Categories Section -->

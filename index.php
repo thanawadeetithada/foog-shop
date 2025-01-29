@@ -37,28 +37,20 @@
         box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
     }
 
+    .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
     h2 {
         color: #000;
         font-size: 2rem;
         margin-bottom: 1rem;
-    }
-
-    form input[type="text"],
-    form input[type="password"] {
-        width: 100%;
-        padding: 0.75rem;
-        margin: 0.5rem 0;
-        border-radius: 25px;
-        border: 1px solid #ccc;
-        outline: none;
-        font-size: 1rem;
-        color: #333;
-        transition: border 0.3s ease;
-    }
-
-    form input[type="text"]:focus,
-    form input[type="password"]:focus {
-        border-color: #f6a821;
     }
 
     form button {
@@ -74,10 +66,6 @@
         transition: background-color 0.3s ease;
     }
 
-    form button:hover {
-        background-color: #f0f0f0;
-    }
-
     .forgot-password {
         text-align: right;
         margin: 5px 0;
@@ -86,19 +74,6 @@
     .forgot-password a {
         color: #000;
         text-decoration: none;
-    }
-
-    .forgot-password a:hover {
-        text-decoration: underline;
-    }
-
-    .register-link a {
-        color: #fff;
-        text-decoration: none;
-    }
-
-    .register-link a:hover {
-        text-decoration: underline;
     }
 
     p {
@@ -120,18 +95,26 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        margin-top: 13rem;
+        padding-top: 7rem;
         height: 100vh;
     }
 
-    .top-tab {
+    form input[type="tel"],
+    form input[type="password"] {
         width: 100%;
-        padding: 30px;
-        background-color: #FDDF59;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1000;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        border-radius: 25px;
+        border: 1px solid #ccc;
+        outline: none;
+        font-size: 1rem;
+        color: #333;
+        transition: border 0.3s ease;
+    }
+
+    form input[type="tel"]:focus,
+    form input[type="password"]:focus {
+        border-color: #f6a821;
     }
     </style>
 </head>
@@ -141,15 +124,18 @@
     <div class="login-wrapper">
         <h2 class="login-title">เข้าสู่ระบบ</h2>
         <div class="login-container">
-            <form action="login_db.php" method="POST">
-                <input type="text" name="phone" placeholder="เบอร์โทร" required>
+            <form action="db/login_db.php" method="POST">
+                <input type="tel" name="phone" placeholder="เบอร์โทร" required pattern="[0-9]{10}" maxlength="10"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.setCustomValidity('');"
+                    oninvalid="this.setCustomValidity('กรุณาใส่เบอร์โทรให้ถูกต้อง (ตัวเลข 10 หลัก)');">
+
                 <input type="password" name="password" placeholder="รหัสผ่าน" required>
                 <div class="forgot-password">
                     <a href="forgot_password.php">ลืมรหัสผ่าน ?</a>
                 </div>
                 <button type="submit">เข้าสู่ระบบ</button>
             </form>
-            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br><a href="user_register.php">ลงทะเบียน</a></p>
+            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br><a href="register.php">ลงทะเบียน</a></p>
         </div>
     </div>
 </body>
