@@ -1,11 +1,76 @@
+<?php
+session_start();
+require 'db.php'; // เชื่อมต่อฐานข้อมูล
+
+// ตรวจสอบว่ามี `product_id` ที่ต้องการแก้ไขหรือไม่
+if (!isset($_GET['product_id'])) {
+    die("ไม่พบสินค้าที่ต้องการแก้ไข");
+}
+
+$product_id = $_GET['product_id'];
+$user_id = $_SESSION['user_id'] ?? null;
+
+// ดึงข้อมูลสินค้าจากฐานข้อมูล
+$stmt = $conn->prepare("SELECT * FROM products WHERE product_id = ?");
+$stmt->bind_param("i", $product_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$product = $result->fetch_assoc();
+$stmt->close();
+
+// ตรวจสอบว่าสินค้านี้เป็นของร้านค้าของเจ้าของบัญชีที่ล็อกอินหรือไม่
+if (!$product) {
+    die("ไม่พบสินค้านี้ในฐานข้อมูล");
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // รับค่าจากฟอร์ม
+    $product_name = $_POST['product_name'];
+    $price = $_POST['price'];
+    $notes = $_POST['notes'] ?? '';
+
+    // แปลงตัวเลือกเพิ่มเติมและค่าใช้จ่ายเป็น JSON
+    $options = isset($_POST['option']) ? json_encode($_POST['option']) : json_encode([]);
+    $extra_costs = isset($_POST['extra_cost']) ? json_encode($_POST['extra_cost']) : json_encode([]);
+
+    // จัดการอัปโหลดรูปภาพใหม่ (ถ้ามี)
+    $target_dir = "uploads/";
+    $image_url = $product['image_url']; // ใช้รูปเดิมถ้าไม่ได้อัปโหลดใหม่
+
+    if (!empty($_FILES["product_image"]["name"])) {
+        $image_file = $target_dir . basename($_FILES["product_image"]["name"]);
+        move_uploaded_file($_FILES["product_image"]["tmp_name"], $image_file);
+        $image_url = $image_file;
+    }
+
+    // อัปเดตข้อมูลสินค้าในฐานข้อมูล
+    $stmt = $conn->prepare("UPDATE products SET product_name = ?, price = ?, options = ?, extra_cost = ?, image_url = ?, notes = ? WHERE product_id = ?");
+    $stmt->bind_param("sdssssi", $product_name, $price, $options, $extra_costs, $image_url, $notes, $product_id);
+
+    if ($stmt->execute()) {
+        echo "บันทึกการแก้ไขสำเร็จ!";
+        header("Location: shop_all_product.php"); // กลับไปที่หน้ารายการสินค้า
+        exit();
+    } else {
+        echo "เกิดข้อผิดพลาด: " . $stmt->error;
+    }
+
+    $stmt->close();
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบผู้ใช้</title>
+    <title>แก้ไขสินค้า</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+    
     * {
         margin: 0;
         padding: 0;
@@ -33,9 +98,7 @@
         transition: box-shadow 0.3s ease;
     }
 
-    .login-container:hover {
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
-    }
+
 
     h2 {
         color: #000;
@@ -44,7 +107,8 @@
     }
 
     form input[type="text"],
-    form input[type="password"] {
+    form input[type="password"],
+    form input[type="number"] {
         width: 100%;
         padding: 0.75rem;
         margin: 0.5rem 0;
@@ -57,7 +121,8 @@
     }
 
     form input[type="text"]:focus,
-    form input[type="password"]:focus {
+    form input[type="password"]:focus,
+    form input[type="number"]:focus {
         border-color: #f6a821;
     }
 
@@ -85,10 +150,6 @@
         cursor: pointer;
         margin-top: 1rem;
         transition: background-color 0.3s ease;
-    }
-
-    form button:hover {
-        background-color: #f0f0f0;
     }
 
     .forgot-password {
@@ -171,6 +232,7 @@
         justify-content: space-between;
         gap: 10px;
         margin-bottom: 10px;
+        align-items: center;
     }
 
     .option-row .option {
@@ -180,45 +242,115 @@
     .option-row .extra {
         width: 30%
     }
+
+    .add-option {
+        width: 20%;
+        padding: 0.75rem;
+        background-color: #ffde59;
+        color: #000;
+        border: 0px;
+        border-radius: 25px;
+        font-size: 1rem;
+        margin: 0 0 10px 0;
+    }
+
+    .remove-option {
+        width: 10%;
+        background-color: #ffffff;
+        color: #000;
+        border: 0px;
+        font-size: 1rem;
+        margin: 0;
+        padding: 0;
+    }
+
+    .remove-option:disabled .fa-trash {
+        cursor: not-allowed;
+        color: gray;
+    }
     </style>
 </head>
 
 <body>
     <div class="login-wrapper">
-        <div class="header">แก้ไขสินค้า</div>
+    <div class="header">แก้ไขสินค้า</div>
         <div class="login-container">
-            <form action="user_register.php" method="POST">
-                <span>ชื่อสินค้า : </span>
-                <input type="text" name="shop_name" placeholder="ข้าวมันไก่ต้ม" required>
-                <span>ราคา (บาท) : </span>
-                <input type="text" name="owner_name" placeholder="50" required>
-                <div class="option-row">
-                    <span>ตัวเลือกเพิ่มเติม :</span>
-                    <span>ค่าใช้จ่ายเพิ่มเติม :</span>
-                </div>
-                <div class="option-row">
-                    <input class="option" type="text" name="option1" placeholder="ธรรมดา" required>
-                    <input class="extra" type="text" name="extra2" placeholder="0" required>
-                </div>
-                <div class="option-row">
-                    <input class="option" type="text" name="option2" placeholder="พิเศษ" required>
-                    <input class="extra" type="text" name="extra2" placeholder="10" required>
-                </div>
+        <form action="edit_product_db.php" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
+  
+        <label>ชื่อสินค้า :</label>
+            <input type="text" name="product_name" value="<?php echo htmlspecialchars($product['product_name']); ?>"
+                required>
 
-                <span>รูปภาพสินค้า : </span>
-                <div class="import-img">
-                    <input type="file" name="payment_proof" id="payment_proof" required>
-                </div>
-                <span>หมายเหตุ : </span>
-                <input type="text" name="owner_name" placeholder="เช่น ข้าวน้อย, ไม่เอาแตงกวา" required>
-                <br>
-                <button type="submit">บันทึก</button>
-                <button class="cancel" type="submit">ยกเลิก</button>
+            <label>ราคา (บาท) :</label>
+            <input type="number" step="0.01" name="price" value="<?php echo htmlspecialchars($product['price']); ?>"
+                required>
 
-            </form>
+            <label>ตัวเลือกเพิ่มเติม :</label>
+            <div id="option-container">
+                <?php 
+                $options = json_decode($product['options'], true) ?? [];
+                $extra_costs = json_decode($product['extra_cost'], true) ?? [];
+
+                for ($i = 0; $i < count($options); $i++) {
+                    echo '<div class="option-row">
+                            <input class="option" type="text" name="option[]" value="' . htmlspecialchars($options[$i]) . '">
+                            <input class="extra" type="number" step="0.01" name="extra_cost[]" value="' . htmlspecialchars($extra_costs[$i] ?? 0) . '">
+                            <button type="button" class="remove-option" onclick="removeOption(this)">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                          </div>';
+                }
+                ?>
+            </div>
+            <button type="button" class="add-option" onclick="addOption()">+</button>
             <br>
-        </div>
+            <label>รูปภาพสินค้า :</label>
+    
+            <input type="file" name="product_image">
+            <?php if ($product['image_url']) { ?>
+            <img src="<?php echo $product['image_url']; ?>" width="100">
+            <?php } ?>
+            <br>
+            <label>หมายเหตุ :</label>
+            <input type="text" name="notes" value="<?php echo htmlspecialchars($product['notes']); ?>">
+
+            <button type="submit">บันทึกการแก้ไข</button>
+            <button class="cancel" type="button" onclick="window.location.href='shop_all_product.php'">ยกเลิก</button>
+        </form>
     </div>
+    </div>
+
+    <script>
+    let optionCount = document.querySelectorAll('.option-row').length;
+    const maxOptions = 5;
+
+    function addOption() {
+        if (optionCount < maxOptions) {
+            const container = document.getElementById("option-container");
+            const newRow = document.createElement("div");
+            newRow.classList.add("option-row");
+
+            newRow.innerHTML = `
+                    <input class="option" type="text" name="option[]" placeholder="พิเศษ">
+                    <input class="extra" type="number" step="0.01" name="extra_cost[]" placeholder="20">
+                    <button type="button" class="remove-option" onclick="removeOption(this)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+
+            container.appendChild(newRow);
+            optionCount++;
+        }
+    }
+
+    function removeOption(button) {
+        if (optionCount > 1) {
+            button.parentElement.remove();
+            optionCount--;
+        }
+    }
+    </script>
 </body>
 
 </html>

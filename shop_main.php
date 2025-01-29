@@ -1,12 +1,39 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
+require_once "db.php";
+
+$sql = "SELECT role FROM users WHERE user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($role);
+$stmt->fetch();
+$stmt->close();
+
+$sql = "SELECT store_name, owner_name, store_id FROM stores WHERE owner_id = ? LIMIT 1";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($store_name, $owner_name, $store_id);
+$stmt->fetch();
+$stmt->close();
+
+if (empty($store_name)) {
+    $store_name = "ไม่พบข้อมูลร้านค้า";
+}
+
 // Mock Data
-$store_name = "ร้านข้าวมันไก่";
-$owner_name = "ปัทมา แก้วปานกัน";
 $order_count = 1;
 $preparing_count = 0;
 $completed_count = 0;
 $total_sales = 1490;
-$store_id = "00001";
 
 $sales_data = [40, 55, 65, 75, 90];
 ?>
@@ -189,17 +216,22 @@ $sales_data = [40, 55, 65, 75, 90];
     <div class="container">
         <div class="row align-items-center">
             <div class="col text-start">
-                <h4><?php echo $store_name; ?></h4>
+                <h4><?php echo htmlspecialchars($store_name, ENT_QUOTES, 'UTF-8'); ?></h4>
             </div>
             <div class="col text-end">
-                <h5><?php echo $owner_name; ?></h5>
+                <h5><?php echo htmlspecialchars($owner_name, ENT_QUOTES, 'UTF-8'); ?></h5>
             </div>
         </div>
 
         <div class="row align-items-center">
             <div class="col text-start">
-                <p class="store-id">Store_ID <?php echo $store_id; ?></p>
+                <p class="store-id">Store_ID <?php echo htmlspecialchars($store_id, ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
+            <?php if ($role == 'admin') : ?>
+            <div class="col text-end">
+                <button>แก้ไขข้อมูล</button>
+            </div>
+            <?php endif; ?>
         </div>
 
         <div class="row align-items-center">
@@ -207,11 +239,11 @@ $sales_data = [40, 55, 65, 75, 90];
                 <h6>สถานะคำสั่งซื้อ</h6>
             </div>
             <div class="col text-end">
-                <h6>ดูประวัติการขาย <i class="fa-solid fa-chevron-right"></i></h6>
+                <a href="shop_all_product.php" style="text-decoration: none; color: inherit;">
+                    <h6>ดูประวัติการขาย <i class="fa-solid fa-chevron-right"></i></h6>
+                </a>
             </div>
         </div>
-
-
 
         <div class="row mt-3">
             <div class="col-4 d-flex flex-column align-items-center">
@@ -256,20 +288,20 @@ $sales_data = [40, 55, 65, 75, 90];
 
 
     <footer class="footer">
-            <div class="footer-item active">
-                <i class="fa-solid fa-house-chimney"></i>&nbsp;
-                <p>HOME</p>
-            </div>
-            <div class="footer-item ">
-                <i class="fa-solid fa-file-alt"></i>
-            </div>
-            <div class="footer-item ">
-                 <i class="fa-solid fa-bell"></i>
-            </div>
-            <div class="footer-item ">
+        <div class="footer-item active">
+            <i class="fa-solid fa-house-chimney"></i>&nbsp;
+            <p>HOME</p>
+        </div>
+        <div class="footer-item ">
+            <i class="fa-solid fa-file-alt"></i>
+        </div>
+        <div class="footer-item ">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="footer-item ">
             <i class="fa-regular fa-folder-open"></i>
-            </div>
-        </footer>
+        </div>
+    </footer>
 
     <!-- Script แสดงกราฟ Chart.js -->
     <script>

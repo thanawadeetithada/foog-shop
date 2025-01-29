@@ -1,36 +1,70 @@
 <?php
 session_start();
-include 'db.php'; // เชื่อมต่อฐานข้อมูล
+include 'db.php';
+
+$role = 'guest';
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT role FROM users WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->bind_result($role);
+    $stmt->fetch();
+    $stmt->close();
+}
+
+// เปลี่ยนข้อความตาม role ของผู้ใช้
+$title_text = ($role === 'admin') ? "เพิ่มร้านค้า" : "ลงทะเบียน";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $store_name = $_POST['store_name'];
-    $owner_name = $_POST['owner_name'];  // ไม่ใช้ในฐานข้อมูล
-    $phone = $_POST['phone'];
+    $store_name = trim($_POST['store_name']);
+    $owner_name = trim($_POST['owner_name']);
+    $phone = trim($_POST['phone']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $category = $_POST['category'];
-    
-    // อัพโหลดรูปภาพ
-    $target_dir = "uploads/";
-    $image_url = $target_dir . basename($_FILES["image"]["name"]);
-    move_uploaded_file($_FILES["image"]["tmp_name"], $image_url);
 
-    // เพิ่มเจ้าของร้านเข้า `Users`
-    $stmt = $conn->prepare("INSERT INTO Users (phone, password, role) VALUES (?, ?, 'store_owner')");
+    $check_stmt = $conn->prepare("SELECT phone FROM users WHERE phone = ?");
+    $check_stmt->bind_param("s", $phone);
+    $check_stmt->execute();
+    $check_stmt->store_result();
+
+    if ($check_stmt->num_rows > 0) {
+        echo "<script>alert('เบอร์โทรศัพท์นี้ถูกใช้งานแล้ว! กรุณาใช้เบอร์อื่น'); window.history.back();</script>";
+        exit();
+    }
+    $check_stmt->close();
+
+    $target_dir = "uploads/";
+    $image_file = basename($_FILES["image"]["name"]);
+    $image_url = $target_dir . $image_file;
+    $image_file_type = strtolower(pathinfo($image_url, PATHINFO_EXTENSION));
+    $allowed_types = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (!in_array($image_file_type, $allowed_types)) {
+        echo "<script>alert('อนุญาตเฉพาะไฟล์ JPG, JPEG, PNG, GIF เท่านั้น'); window.history.back();</script>";
+        exit();
+    }
+
+    if (!move_uploaded_file($_FILES["image"]["tmp_name"], $image_url)) {
+        echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ'); window.history.back();</script>";
+        exit();
+    }
+
+    $stmt = $conn->prepare("INSERT INTO users (phone, password, role) VALUES (?, ?, 'store_owner')");
     $stmt->bind_param("ss", $phone, $password);
     if ($stmt->execute()) {
         $owner_id = $conn->insert_id;
 
-        // เพิ่มข้อมูลร้านค้าใน `Stores`
-        $stmt = $conn->prepare("INSERT INTO Stores (store_name, owner_id, category, phone, image_url) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sisss", $store_name, $owner_id, $category, $phone, $image_url);
+        $stmt = $conn->prepare("INSERT INTO stores (store_name, owner_id, owner_name, category, phone, image_url) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sissss", $store_name, $owner_id, $owner_name, $category, $phone, $image_url);
         if ($stmt->execute()) {
             echo "<script>alert('ลงทะเบียนร้านค้าเรียบร้อย!'); window.location.href = 'index.php';</script>";
             exit();
         } else {
-            echo "เกิดข้อผิดพลาดในการลงทะเบียนร้านค้า";
+            echo "<script>alert('เกิดข้อผิดพลาดในการลงทะเบียนร้านค้า'); window.history.back();</script>";
         }
     } else {
-        echo "เกิดข้อผิดพลาดในการสร้างบัญชีเจ้าของร้าน";
+        echo "<script>alert('เกิดข้อผิดพลาดในการสร้างบัญชีเจ้าของร้าน'); window.history.back();</script>";
     }
 }
 ?>
@@ -40,9 +74,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ลงทะเบียนร้านค้า</title>
+    <title><?php echo $title_text; ?></title>
     <style>
-    * {
+   * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -187,7 +221,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="top-tab"></div>
     <div class="login-wrapper">
-        <h2 class="login-title">ลงทะเบียน</h2>
+        <h2 class="login-title"><?php echo $title_text; ?></h2>
         <div class="login-container">
             <form method="POST" action="" enctype="multipart/form-data">
                 <input type="text" name="store_name" placeholder="ชื่อร้าน" required>
@@ -206,10 +240,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="import-img">
                     <input type="file" name="image" id="image" required>
                 </div>
-                <button type="submit">ลงทะเบียน</button>
+                <button type="submit"><?php echo ($role === 'admin') ? "เพิ่มร้านค้า" : "ลงทะเบียน"; ?></button>
             </form>
             <br>
-            <a href="index.php">เข้าสู่ระบบ</a>
+            <?php if ($role !== 'admin') : ?>
+                <a href="index.php">เข้าสู่ระบบ</a>
+            <?php endif; ?>
         </div>
     </div>
     <script>

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบผู้ใช้</title>
+    <title>เพิ่มสินค้าใหม่</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
     * {
         margin: 0;
@@ -33,9 +34,7 @@
         transition: box-shadow 0.3s ease;
     }
 
-    .login-container:hover {
-        box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
-    }
+
 
     h2 {
         color: #000;
@@ -44,7 +43,8 @@
     }
 
     form input[type="text"],
-    form input[type="password"] {
+    form input[type="password"],
+    form input[type="number"] {
         width: 100%;
         padding: 0.75rem;
         margin: 0.5rem 0;
@@ -57,7 +57,8 @@
     }
 
     form input[type="text"]:focus,
-    form input[type="password"]:focus {
+    form input[type="password"]:focus,
+    form input[type="number"]:focus {
         border-color: #f6a821;
     }
 
@@ -85,10 +86,6 @@
         cursor: pointer;
         margin-top: 1rem;
         transition: background-color 0.3s ease;
-    }
-
-    form button:hover {
-        background-color: #f0f0f0;
     }
 
     .forgot-password {
@@ -171,6 +168,7 @@
         justify-content: space-between;
         gap: 10px;
         margin-bottom: 10px;
+        align-items: center;
     }
 
     .option-row .option {
@@ -180,6 +178,32 @@
     .option-row .extra {
         width: 30%
     }
+
+    .add-option {
+        width: 20%;
+        padding: 0.75rem;
+        background-color: #ffde59;
+        color: #000;
+        border: 0px;
+        border-radius: 25px;
+        font-size: 1rem;
+        margin: 0 0 10px 0;
+    }
+
+    .remove-option {
+        width: 10%;
+        background-color: #ffffff;
+        color: #000;
+        border: 0px;
+        font-size: 1rem;
+        margin: 0;
+        padding: 0;
+    }
+
+    .remove-option:disabled .fa-trash {
+        cursor: not-allowed;
+        color: gray;
+    }
     </style>
 </head>
 
@@ -187,37 +211,85 @@
     <div class="login-wrapper">
         <div class="header">เพิ่มสินค้าใหม่</div>
         <div class="login-container">
-            <form action="user_register.php" method="POST">
+            <form action="add_product_db.php" method="POST" enctype="multipart/form-data">
                 <span>ชื่อสินค้า : </span>
-                <input type="text" name="shop_name" required>
+                <input type="text" name="product_name" required>
+
                 <span>ราคา (บาท) : </span>
-                <input type="text" name="owner_name" required>
-                <div class="option-row">
+                <input type="number" step="0.01" name="price" required>
+
+                <div class="option-row" style="margin-bottom: 0px;">
                     <span>ตัวเลือกเพิ่มเติม :</span>
                     <span>ค่าใช้จ่ายเพิ่มเติม :</span>
                 </div>
-                <div class="option-row">
-                    <input class="option" type="text" name="option1" placeholder="" required>
-                    <input class="extra" type="text" name="extra2" placeholder="" required>
-                </div>
-                <div class="option-row">
-                    <input class="option" type="text" name="option2" placeholder="" required>
-                    <input class="extra" type="text" name="extra2" placeholder="" required>
+
+                <div id="option-container">
+                    <div class="option-row" style="margin-bottom: 0px;">
+                        <input class="option" type="text" name="option[]" placeholder="ธรรมดา">
+                        <input class="extra" type="number" step="0.01" name="extra_cost[]" placeholder="0">
+                        <button type="button" class="remove-option" disabled>
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
 
+                <button type="button" class="add-option" onclick="addOption()">+</button>
+
+                <br>
                 <span>รูปภาพสินค้า : </span>
                 <div class="import-img">
-                    <input type="file" name="payment_proof" id="payment_proof" required>
+                    <input type="file" name="product_image" accept="image/*" required>
                 </div>
                 <span>หมายเหตุ : </span>
-                <input type="text" name="owner_name" placeholder="" required>
-                <br>
+                <input type="text" name="notes" placeholder="">
+
                 <button type="submit">บันทึกสินค้า</button>
-                <button class="cancel" type="submit">กลับไปหน้าหลัก</button>
+                <button class="cancel" type="button"
+                    onclick="window.location.href='shop_all_product.php'">กลับไปหน้าหลัก</button>
             </form>
             <br>
         </div>
     </div>
+    <script>
+    let optionCount = 1;
+    const maxOptions = 5;
+
+    function addOption() {
+        if (optionCount < maxOptions) {
+            const container = document.getElementById("option-container");
+            const newRow = document.createElement("div");
+            newRow.classList.add("option-row");
+            newRow.setAttribute("style", "margin-bottom: 0px;"); 
+
+            newRow.innerHTML = `
+                <input class="option" type="text" name="option[]" placeholder="พิเศษ">
+                <input class="extra" type="number" step="0.01" name="extra_cost[]" placeholder="20">
+                <button type="button" class="remove-option" onclick="removeOption(this)">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+
+            container.appendChild(newRow);
+            optionCount++;
+
+            if (optionCount >= maxOptions) {
+                document.querySelector(".add-option").style.display = "none"; // ซ่อนปุ่ม +
+            }
+        }
+    }
+
+    function removeOption(button) {
+        if (optionCount > 1) {
+            button.parentElement.remove();
+            optionCount--;
+
+            if (optionCount < maxOptions) {
+                document.querySelector(".add-option").style.display = "block"; // แสดงปุ่ม + กลับมา
+            }
+        }
+    }
+</script>
+
 </body>
 
 </html>
