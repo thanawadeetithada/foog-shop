@@ -322,22 +322,19 @@ foreach ($cart as $item) {
 
     <div class="cart">
         <h2>ตะกร้าสินค้า</h2>
-        <?php if (empty($cart)): ?>
-        <p>ไม่มีสินค้าในตระกร้า.</p>
-        <?php else: ?>
         <ul>
-            <?php foreach ($cart as $item): ?>
+            
             <li>
-                <p><?php echo $item['name']; ?></p>
-                <p>ราคา: <?php echo number_format($item['price'], 2); ?> ฿</p>
-                <p>หมายเหตุ: <?php echo $item['note']; ?></p>
-                <p>ตัวเลือกพิเศษ: <?php echo $item['special_option'] ? 'Yes' : 'No'; ?></p>
-                <p>จำนวน: <?php echo $item['quantity']; ?></p>
+                <p>ss</p>
+                <p>ราคา: 50 ฿</p>
+                <p>หมายเหตุ: dd</p>
+                <p>ตัวเลือกพิเศษ: fc</p>
+                <p>จำนวน: 1</p>
             </li>
-            <?php endforeach; ?>
+         
         </ul>
         <p><strong>รวมทั้งหมด: <?php echo number_format($total_price, 2); ?> ฿</strong></p>
-        <?php endif; ?>
+     
     </div>
 
     <footer class="footer">

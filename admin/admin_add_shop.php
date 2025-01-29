@@ -57,7 +57,7 @@ if (!$store_result) {
         margin: 0 10px 0 0;
         align-items: center;
         justify-content: center;
-        width: 80%;
+        width: 70%;
     }
 
     .header input {
@@ -152,12 +152,12 @@ if (!$store_result) {
 
     /* Recommended Shops Section */
     .recommended {
-        margin: 0px 20px 20px 20px;
+        margin: 20px;
     }
 
     .recommended h3 {
         margin-bottom: 10px;
-        margin-top: 0px;
+        margin-top: 15px;
         font-size: 18px;
         color: #333;
     }
@@ -193,7 +193,6 @@ if (!$store_result) {
         justify-content: space-around;
         background-color: #fff;
         padding: 5px 0;
-        margin-left: 20px;
         position: fixed;
         bottom: 0;
         margin-bottom: 20px;
@@ -305,12 +304,85 @@ if (!$store_result) {
         /* border: 1px solid #ccc; */
         border-radius: 15px;
     }
+
+    .menu-item {
+        display: flex;
+        /* ใช้ Flexbox */
+        justify-content: space-between;
+        /* กระจายช่องว่างระหว่างเนื้อหา */
+        align-items: center;
+        /* จัดตำแหน่งแนวตั้ง */
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .menu-item .shop-btn {
+        background-color: #0448A9;
+        border: 0px;
+        padding: 0.4rem;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .menu-item .edit-shop-btn {
+        background-color: red;
+        border: 0px;
+        padding: 0.4rem;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .price {
+        margin-left: auto;
+        /* ดันไปด้านขวาสุด */
+        color: #333;
+        /* สีของข้อความ */
+        font-weight: bold;
+        /* เน้นตัวหนา */
+    }
+
+    .search-btn {
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        border: 0px;
+        background-color: #5171FF;
+    }
+
+    .details-bottom {
+    position: fixed; 
+    bottom: 0;
+    left: 0;
+    width: 90%;
+    padding: 20px;
+    z-index: 1000;
+}
+
+    .reorder-button {
+        display: block;
+        text-align: center;
+        background-color: #ffd700;
+        color: #333;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+    }
+
+    .reorder-button:hover {
+        background-color: #ffc107;
+    }
+
+    .fa-arrow-left {
+        margin-right: 20px;
+    }
     </style>
 </head>
+
 
 <body>
     <!-- Header Section -->
     <div class="header">
+    <i class="fa-solid fa-arrow-left"></i>&nbsp;&nbsp;
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"
@@ -319,69 +391,55 @@ if (!$store_result) {
             </div>
         </form>
         <i class="fa-solid fa-circle-user"></i>
-    </div>
+        </div>
 
-    <!-- Banner Section -->
-    <div class="banner">
-        <img src="RMUTP FOOD.jpg" alt="RMUTP Food" class="banner-img">
-    </div>
-
-    <!-- Categories Section -->
-    <nav class="categories">
-        <div class="category">
-            <button><i class="fa-solid fa-utensils"></i></button>
-            <p>อาหาร</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-mug-hot"></i></button>
-            <p>เครื่องดื่ม</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-ice-cream"></i></button>
-            <p>ของทานเล่น</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-table-cells-large"></i></button>
-            <p>อื่นๆ</p>
-        </div>
-    </nav>
 
     <!-- Recommended Shops Section -->
     <div class="recommended">
-        <h3>ร้านแนะนำ</h3>
+        <h3>ร้านค้า</h3>
         <div class="shops">
-            <?php while ($store_row = $store_result->fetch_assoc()): ?>
             <div class="shop">
-                <a href="store_products.php?store_id=<?php echo $store_row['id']; ?>">
-                    <?php
-                $image_path = !empty($store_row['image']) && file_exists($store_row['image']) ? $store_row['image'] : 'default_image.jpg';
-            ?>
-                    <img src="<?php echo htmlspecialchars($image_path); ?>"
-                        alt="<?php echo htmlspecialchars($store_row['name']); ?>" />
-                    <p><?php echo htmlspecialchars($store_row['name']); ?></p>
+                <a>
+                    <img src="uploads/ไก่ต้ม.jpg">
+                    <p class="menu-item">
+                        <span>ร้านข้าวมันไก่</span>
+                    </p>
+                    <p class="menu-item">
+                        <button class="shop-btn">ดูร้านค้า</button>                        
+                        <button class="edit-shop-btn">แก้ไข</button>
+                    </p>
                 </a>
             </div>
-            <?php endwhile; ?>
-        </div>
-    </div>
 
-    <!-- Footer Section -->
-    <footer class="footer">
-        <div class="footer-item active">
-            <i class="fa-solid fa-house-chimney"></i>&nbsp;
-            <p>HOME</p>
+            <div class="shop">
+                <a>
+                    <img src="uploads/ลูกชิ้น.jpg">
+                    <p class="menu-item">
+                        <span>ร้านลูกชิ้นทอด</span>
+                    </p>
+                    <p class="menu-item">
+                        <button class="shop-btn">ดูร้านค้า</button>                        
+                        <button class="edit-shop-btn">แก้ไข</button>
+                    </p>
+                </a>
+            </div>
+            <div class="shop">
+                <a>
+                    <img src="uploads/กาแฟโบราณ.jpg">
+                    <p class="menu-item">
+                        <span>ร้านกาแฟโบราณ</span>
+                    </p>
+                    <p class="menu-item">
+                        <button class="shop-btn">ดูร้านค้า</button>                        
+                        <button class="edit-shop-btn">แก้ไข</button>
+                    </p>
+                </a>
+            </div>
         </div>
-        <div class="footer-item">
-            <i class="fa-solid fa-file-alt"></i>
-        </div>
-        <div class="footer-item">
-            <i class="fa-solid fa-cart-shopping"></i>
-        </div>
-        <div class="footer-item notification">
-            <i class="fa-solid fa-bell"></i>
-            <span class="notification-badge"></span>
-        </div>
-    </footer>
+
+        <footer class="details-bottom">
+            <a href="#" class="reorder-button">เพิ่มร้านค้า</a>
+        </footer>
 </body>
 
 </html>

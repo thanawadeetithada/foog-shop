@@ -54,7 +54,7 @@ if (!$store_result) {
     }
 
     .header form {
-        margin: 0 10px 0 0;
+        margin: 0;
         align-items: center;
         justify-content: center;
         width: 80%;
@@ -152,12 +152,12 @@ if (!$store_result) {
 
     /* Recommended Shops Section */
     .recommended {
-        margin: 0px 20px 20px 20px;
+        margin: 20px;
     }
 
     .recommended h3 {
         margin-bottom: 10px;
-        margin-top: 0px;
+        margin-top: 15px;
         font-size: 18px;
         color: #333;
     }
@@ -193,7 +193,6 @@ if (!$store_result) {
         justify-content: space-around;
         background-color: #fff;
         padding: 5px 0;
-        margin-left: 20px;
         position: fixed;
         bottom: 0;
         margin-bottom: 20px;
@@ -305,6 +304,26 @@ if (!$store_result) {
         /* border: 1px solid #ccc; */
         border-radius: 15px;
     }
+
+    .menu-item {
+        display: flex;
+        /* ใช้ Flexbox */
+        justify-content: space-between;
+        /* กระจายช่องว่างระหว่างเนื้อหา */
+        align-items: center;
+        /* จัดตำแหน่งแนวตั้ง */
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .price {
+        margin-left: auto;
+        /* ดันไปด้านขวาสุด */
+        color: #333;
+        /* สีของข้อความ */
+        font-weight: bold;
+        /* เน้นตัวหนา */
+    }
     </style>
 </head>
 
@@ -318,70 +337,74 @@ if (!$store_result) {
                 <button type="submit"><i class="fas fa-search"></i></button>
             </div>
         </form>
-        <i class="fa-solid fa-circle-user"></i>
     </div>
 
-    <!-- Banner Section -->
-    <div class="banner">
-        <img src="RMUTP FOOD.jpg" alt="RMUTP Food" class="banner-img">
-    </div>
-
-    <!-- Categories Section -->
-    <nav class="categories">
-        <div class="category">
-            <button><i class="fa-solid fa-utensils"></i></button>
-            <p>อาหาร</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-mug-hot"></i></button>
-            <p>เครื่องดื่ม</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-ice-cream"></i></button>
-            <p>ของทานเล่น</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-table-cells-large"></i></button>
-            <p>อื่นๆ</p>
-        </div>
-    </nav>
 
     <!-- Recommended Shops Section -->
     <div class="recommended">
-        <h3>ร้านแนะนำ</h3>
+        <h3>เมนูยอดนิยม</h3>
         <div class="shops">
-            <?php while ($store_row = $store_result->fetch_assoc()): ?>
             <div class="shop">
-                <a href="store_products.php?store_id=<?php echo $store_row['id']; ?>">
-                    <?php
-                $image_path = !empty($store_row['image']) && file_exists($store_row['image']) ? $store_row['image'] : 'default_image.jpg';
-            ?>
-                    <img src="<?php echo htmlspecialchars($image_path); ?>"
-                        alt="<?php echo htmlspecialchars($store_row['name']); ?>" />
-                    <p><?php echo htmlspecialchars($store_row['name']); ?></p>
+                <a>
+                    <img src="images/ไก่ต้ม.jpg">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ต้ม</span>
+                        <span class="price"><strong>50฿</strong></span>
+                    </p>
                 </a>
             </div>
-            <?php endwhile; ?>
-        </div>
-    </div>
 
-    <!-- Footer Section -->
-    <footer class="footer">
-        <div class="footer-item active">
-            <i class="fa-solid fa-house-chimney"></i>&nbsp;
-            <p>HOME</p>
+            <div class="shop">
+                <a>
+                    <img src="images/ไก่ทอด.png">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ทอด</span>
+                        <span class="price"><strong>50฿</strong></span>
+                    </p>
+                </a>
+            </div>
         </div>
-        <div class="footer-item">
-            <i class="fa-solid fa-file-alt"></i>
+
+
+        <h3>เมนูแนะนำ</h3>
+        <div class="shops">
+            <div class="shop">
+                <a>
+                    <img src="images/ไก่ย่าง.jpg">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ย่าง</span>
+                        <span class="price"><strong>50฿</strong></span>
+                    </p>
+                </a>
+            </div>
+            <div class="shop">
+                <a>
+                    <img src="images/ไก่ต้ม.jpg">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ต้ม</span>
+                        <span class="price"><strong>50฿</strong></span>
+                    </p>
+                </a>
+            </div>
         </div>
-        <div class="footer-item">
-            <i class="fa-solid fa-cart-shopping"></i>
-        </div>
-        <div class="footer-item notification">
-            <i class="fa-solid fa-bell"></i>
-            <span class="notification-badge"></span>
-        </div>
-    </footer>
+
+        <!-- Footer Section -->
+        <footer class="footer">
+            <div class="footer-item active">
+                <i class="fa-solid fa-house-chimney"></i>&nbsp;
+                <p>HOME</p>
+            </div>
+            <div class="footer-item">
+                <i class="fa-solid fa-file-alt"></i>
+            </div>
+            <div class="footer-item">
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div class="footer-item notification">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-badge"></span>
+            </div>
+        </footer>
 </body>
 
 </html>

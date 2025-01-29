@@ -68,10 +68,9 @@ if ($result && $result->num_rows > 0) {
 
     .status-item {
         display: flex;
-        align-items: center;
         justify-content: space-between;
-        padding: 1rem 1rem;
-       
+        padding: 1.5rem 1rem 0.5rem 1rem;
+
     }
 
     .icon {
@@ -92,11 +91,19 @@ if ($result && $result->num_rows > 0) {
     .details .order {
         font-size: 1rem;
         color: black;
+        margin-bottom: 5px;
     }
 
-    .details .status {
-        font-size: 1.2rem;
+    .details .order-prepare {
+        font-size: 1rem;
+        color: #ff7e2e;
+        margin-bottom: 5px;
+    }
+
+    .details .order-confirm {
+        font-size: 1rem;
         color: #4caf50;
+        margin-bottom: 5px;
     }
 
     .price {
@@ -151,8 +158,32 @@ if ($result && $result->num_rows > 0) {
         font-size: 1.5em;
     }
 
+    .row {
+        display: flex;
+        /* ใช้ Flexbox */
+        justify-content: space-between;
+        /* กระจายพื้นที่ระหว่างคอลัมน์ */
+        align-items: center;
+        /* จัดให้อยู่ตรงกลางในแนวตั้ง */
+        margin-bottom: 5px;
+    }
+
+    .column {
+
+        text-align: center;
+        /* จัดข้อความให้อยู่ตรงกลาง */
+        padding: 0 5px;
+        /* เพิ่มช่องว่างระหว่างคอลัมน์ */
+    }
+
+    .column:last-child {
+        text-align: right;
+        /* จัดข้อความในคอลัมน์สุดท้ายให้อยู่ขวา */
+    }
+
+
     /* Footer Section */
-  .footer {
+    .footer {
         align-items: center;
         display: flex;
         justify-content: space-around;
@@ -189,7 +220,7 @@ if ($result && $result->num_rows > 0) {
         padding: 10px 20px;
         color: #fff;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-       
+
     }
 
     .notification-badge {
@@ -234,19 +265,28 @@ if ($result && $result->num_rows > 0) {
     <div class="top-tab"></div>
 
     <div class="container">
-    <div class="header">แจ้งเตือน</div>
+        <div class="header">รายการคำสั่งซื้อ</div>
         <main>
-           
+
             <div class="status-item">
                 <div class="icon">
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div class="details">
-                    <span class="order"><strong>Order : 003</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านข้าวมันไก่</strong></span>
-                    <br>
-                    <span class="status">เสร็จสิ้นแล้ว</span>
-                </div>              
+                    <div class="row">
+                        <span class="column"><strong>22 ธ.ค. 67, 10:25</strong></span>
+                        <span class="column"><strong>Order : 003</strong></span>
+                        <span class="column"><strong>150฿</strong></span>
+                    </div>
+                    <p class="order"><i
+                            class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x2</span>
+                            <br>
+                            <strong style="margin-left: 20px;">ข้าวมันไก่ทอด</strong>&nbsp;<span>x1</span>
+                    </p>
+
+                    <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
+                    <p class="order-prepare" >กำลังเตรียม</p>
+                </div>
             </div>
             <hr>
             <div class="status-item">
@@ -254,11 +294,17 @@ if ($result && $result->num_rows > 0) {
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div class="details">
-                    <span class="order"><strong>Order : 002</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านกาแฟโบราณ</strong></span>
-                    <br>
-                    <span class="status">เสร็จสิ้นแล้ว</span>
-                </div>              
+                    <div class="row">
+                        <span class="column"><strong>17 ธ.ค. 67, 09:25</strong></span>
+                        <span class="column"><strong>Order : 002</strong></span>
+                        <span class="column"><strong>50฿</strong></span>
+                    </div>
+                    <p class="order"><i
+                            class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ลูกชิ้นทอด</strong>&nbsp;<span>x1</span>
+                    </p>
+                    <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
+                    <p class="order-confirm">เสร็จสิ้นแล้ว</p>
+                </div>
             </div>
             <hr>
             <div class="status-item">
@@ -266,29 +312,37 @@ if ($result && $result->num_rows > 0) {
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div class="details">
-                    <span class="order"><strong>Order : 001</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านข้าวมันไก่</strong></span>
-                    <br>
-                    <span class="status">เสร็จสิ้นแล้ว</span>
-                </div>              
+                    <div class="row">
+                        <span class="column"><strong>16 ธ.ค. 67, 11:45</strong></span>
+                        <span class="column"><strong>Order : 001</strong></span>
+                        <span class="column"><strong>50฿</strong></span>
+                    </div>
+                    <p class="order"><i
+                            class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x1</span>
+                    </p>
+                    <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
+                    <p class="order-confirm">เสร็จสิ้นแล้ว</p>
+                </div>
             </div>
+            <hr>
         </main>
     </div>
     <footer class="footer">
-            <div class="footer-item">
-                <i class="fa-solid fa-house-chimney"></i>&nbsp;
-                <p>HOME</p>
-            </div>
-            <div class="footer-item ">
-                <i class="fa-solid fa-file-alt"></i>
-            </div>
-            <div class="footer-item ">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-            <div class="footer-item active">
-                <i class="fa-solid fa-bell"></i>
-            </div>
-        </footer>
+        <div class="footer-item">
+            <i class="fa-solid fa-house-chimney"></i>&nbsp;
+            <p>HOME</p>
+        </div>
+        <div class="footer-item active">
+            <i class="fa-solid fa-file-alt"></i>
+        </div>
+        <div class="footer-item ">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div class="footer-item notification">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
+        </div>
+    </footer>
 </body>
 
 </html>

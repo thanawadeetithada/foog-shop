@@ -180,21 +180,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     left: 0;
     z-index: 1000;
 }
+
+.import-img {
+    width: 100%;
+    padding: 0.6rem;
+    margin: 0.5rem 0;
+    border-radius: 25px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 1rem;
+    color: #333;
+    transition: border 0.3s ease;
+    background-color: #ffffff;
+}
     </style>
 </head>
 
 <body>
     <div class="top-tab"></div>
     <div class="login-wrapper">
-    <h2 class="login-title">ลงทะเบียน</h2>
+    <h2 class="login-title">เพิ่มร้านค้า</h2>
 
         <div class="login-container">
             <form action="user_register.php" method="POST">
-                <input type="text" name="shop_name" placeholder="เบอร์โทร" required>
-                <!-- <input type="text" name="owner_name" placeholder="ชื่อเจ้าของร้าน" required>
-                <input type="text" name="phone" placeholder="เบอร์โทร" required> -->
+                <input type="text" name="shop_name" placeholder="ชื่อร้าน" required>
+                <input type="text" name="owner_name" placeholder="ชื่อเจ้าของร้าน" required>
+                <input type="text" name="phone" placeholder="เบอร์โทร" required>
                 <input type="password" name="password" placeholder="รหัสผ่าน" required>
-                <br><br>
+                <input type="text" name="phone" placeholder="หมวดหมู่" required>
+                <div class="import-img">
+                    <input type="file" name="payment_proof" id="payment_proof" required>
+                </div>                <br><br>
                 <button type="submit">ลงทะเบียน</button>
             </form>
             <br>

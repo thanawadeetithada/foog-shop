@@ -54,7 +54,7 @@ if (!$store_result) {
     }
 
     .header form {
-        margin: 0 10px 0 0;
+        margin: 0  10px  0 0px;
         align-items: center;
         justify-content: center;
         width: 80%;
@@ -305,6 +305,15 @@ if (!$store_result) {
         /* border: 1px solid #ccc; */
         border-radius: 15px;
     }
+
+    .categories button svg.active {
+        color: black;
+        
+    }
+
+    .category .work {
+        box-shadow: 10px 10px 5px rgba(0, 0, 0, 0.1);
+    }
     </style>
 </head>
 
@@ -319,7 +328,7 @@ if (!$store_result) {
             </div>
         </form>
         <i class="fa-solid fa-circle-user"></i>
-    </div>
+        </div>
 
     <!-- Banner Section -->
     <div class="banner">
@@ -329,19 +338,19 @@ if (!$store_result) {
     <!-- Categories Section -->
     <nav class="categories">
         <div class="category">
-            <button><i class="fa-solid fa-utensils"></i></button>
+            <button ><i class="fa-solid fa-utensils"></i></button>
             <p>อาหาร</p>
         </div>
         <div class="category">
-            <button><i class="fa-solid fa-mug-hot"></i></button>
+            <button ><i class="fa-solid fa-mug-hot "></i></button>
             <p>เครื่องดื่ม</p>
         </div>
         <div class="category">
-            <button><i class="fa-solid fa-ice-cream"></i></button>
+            <button ><i class="fa-solid fa-ice-cream "></i></button>
             <p>ของทานเล่น</p>
         </div>
         <div class="category">
-            <button><i class="fa-solid fa-table-cells-large"></i></button>
+            <button class="work" ><i class="fa-solid fa-table-cells-large active"></i></button>
             <p>อื่นๆ</p>
         </div>
     </nav>
@@ -350,18 +359,15 @@ if (!$store_result) {
     <div class="recommended">
         <h3>ร้านแนะนำ</h3>
         <div class="shops">
-            <?php while ($store_row = $store_result->fetch_assoc()): ?>
             <div class="shop">
                 <a href="store_products.php?store_id=<?php echo $store_row['id']; ?>">
                     <?php
                 $image_path = !empty($store_row['image']) && file_exists($store_row['image']) ? $store_row['image'] : 'default_image.jpg';
             ?>
-                    <img src="<?php echo htmlspecialchars($image_path); ?>"
-                        alt="<?php echo htmlspecialchars($store_row['name']); ?>" />
-                    <p><?php echo htmlspecialchars($store_row['name']); ?></p>
+                    <img src="images/ลูกชิ้น.jpg" />
+                    <p>ร้านลูกชิ้นทอด</p>
                 </a>
             </div>
-            <?php endwhile; ?>
         </div>
     </div>
 

@@ -54,7 +54,7 @@ if (!$store_result) {
     }
 
     .header form {
-        margin: 0 10px 0 0;
+        margin: 0  10px  0 0px;
         align-items: center;
         justify-content: center;
         width: 80%;
@@ -319,7 +319,7 @@ if (!$store_result) {
             </div>
         </form>
         <i class="fa-solid fa-circle-user"></i>
-    </div>
+        </div>
 
     <!-- Banner Section -->
     <div class="banner">

@@ -54,7 +54,7 @@ if (!$store_result) {
     }
 
     .header form {
-        margin: 0 10px 0 0;
+        margin: 0;
         align-items: center;
         justify-content: center;
         width: 80%;
@@ -82,13 +82,9 @@ if (!$store_result) {
 
     .banner-img {
         width: 100%;
-        /* ปรับขนาดให้เต็มความกว้าง */
         max-height: 200px;
-        /* กำหนดความสูงสูงสุด */
         object-fit: contain;
-        /* ใช้ contain เพื่อไม่ให้รูปภาพยืด */
         border-radius: 10px;
-        /* กำหนดมุมโค้ง */
     }
 
     .categories {
@@ -152,12 +148,12 @@ if (!$store_result) {
 
     /* Recommended Shops Section */
     .recommended {
-        margin: 0px 20px 20px 20px;
+        margin: 20px;
     }
 
     .recommended h3 {
         margin-bottom: 10px;
-        margin-top: 0px;
+        margin-top: 15px;
         font-size: 18px;
         color: #333;
     }
@@ -193,7 +189,6 @@ if (!$store_result) {
         justify-content: space-around;
         background-color: #fff;
         padding: 5px 0;
-        margin-left: 20px;
         position: fixed;
         bottom: 0;
         margin-bottom: 20px;
@@ -305,83 +300,208 @@ if (!$store_result) {
         /* border: 1px solid #ccc; */
         border-radius: 15px;
     }
+
+    .menu-item {
+        display: flex;
+        /* ใช้ Flexbox */
+        justify-content: space-evenly;
+        /* กระจายช่องว่างระหว่างเนื้อหา */
+        align-items: center;
+        /* จัดตำแหน่งแนวตั้ง */
+        margin-left: 5px;
+        margin-right: 5px;
+        text-align: center;
+    }
+
+    .menu-item .shop-btn {
+        background-color: #0448A9;
+        border: 0px;
+        padding: 0.4rem;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .menu-item .edit-shop-btn {
+        background-color: red;
+        border: 0px;
+        padding: 0.4rem;
+        border-radius: 5px;
+        color: white;
+    }
+
+    .price {
+        margin-left: auto;
+        /* ดันไปด้านขวาสุด */
+        color: #333;
+        /* สีของข้อความ */
+        font-weight: bold;
+        /* เน้นตัวหนา */
+    }
+
+    .details-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 90%;
+        padding: 20px;
+        z-index: 1000;
+    }
+
+    .reorder-button {
+        display: block;
+        text-align: center;
+        background-color: #ffd700;
+        color: #333;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+    }
+
+    .reorder-button:hover {
+        background-color: #ffc107;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    input:checked+.toggle-slider {
+        background-color: #4CAF50;
+    }
+
+    input:checked+.toggle-slider:before {
+        transform: translateX(20px);
+    }
+
+    .toggle-status {
+        margin-left: 10px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .fa-arrow-left {
+        margin-right: 20px;
+    }
+    .search-btn {
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        border: 0px;
+        background-color: #5171FF;
+        margin-left: 5px;
+    }
     </style>
 </head>
 
 <body>
     <!-- Header Section -->
     <div class="header">
+    <i class="fa-solid fa-arrow-left"></i>&nbsp;&nbsp;
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"
                     value="<?php echo isset($_GET['query']) ? htmlspecialchars($_GET['query']) : ''; ?>">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </div>
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </div>
         </form>
-        <i class="fa-solid fa-circle-user"></i>
-    </div>
 
-    <!-- Banner Section -->
-    <div class="banner">
-        <img src="RMUTP FOOD.jpg" alt="RMUTP Food" class="banner-img">
-    </div>
+        </div>
 
-    <!-- Categories Section -->
-    <nav class="categories">
-        <div class="category">
-            <button><i class="fa-solid fa-utensils"></i></button>
-            <p>อาหาร</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-mug-hot"></i></button>
-            <p>เครื่องดื่ม</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-ice-cream"></i></button>
-            <p>ของทานเล่น</p>
-        </div>
-        <div class="category">
-            <button><i class="fa-solid fa-table-cells-large"></i></button>
-            <p>อื่นๆ</p>
-        </div>
-    </nav>
 
     <!-- Recommended Shops Section -->
     <div class="recommended">
-        <h3>ร้านแนะนำ</h3>
+        <h3>สินค้าทั้งหมด</h3>
         <div class="shops">
-            <?php while ($store_row = $store_result->fetch_assoc()): ?>
             <div class="shop">
-                <a href="store_products.php?store_id=<?php echo $store_row['id']; ?>">
-                    <?php
-                $image_path = !empty($store_row['image']) && file_exists($store_row['image']) ? $store_row['image'] : 'default_image.jpg';
-            ?>
-                    <img src="<?php echo htmlspecialchars($image_path); ?>"
-                        alt="<?php echo htmlspecialchars($store_row['name']); ?>" />
-                    <p><?php echo htmlspecialchars($store_row['name']); ?></p>
+                <a>
+                    <img src="uploads/ไก่ต้ม.jpg">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ต้ม</span>
+                        <p>50.00฿</p>
+                    </p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" class="toggle-checkbox" onchange="toggleShop(this)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <p class="menu-item">
+                        <button class="shop-btn">แก้ไข</button>
+                        <button class="edit-shop-btn">ลบ</button>
+                    </p>
                 </a>
             </div>
-            <?php endwhile; ?>
-        </div>
-    </div>
 
-    <!-- Footer Section -->
-    <footer class="footer">
-        <div class="footer-item active">
-            <i class="fa-solid fa-house-chimney"></i>&nbsp;
-            <p>HOME</p>
+            <div class="shop">
+                <a>
+                    <img src="uploads/ไก่ทอด.png">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ทอด</span>
+                        <p>50.00฿</p>
+                    </p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" class="toggle-checkbox" onchange="toggleShop(this)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <p class="menu-item">
+                        <button class="shop-btn">แก้ไข</button>
+                        <button class="edit-shop-btn">ลบ</button>
+                    </p>
+                </a>
+            </div>
+            <div class="shop">
+                <a>
+                    <img src="uploads/ไก่ย่าง.jpg">
+                    <p class="menu-item">
+                        <span>ข้าวมันไก่ย่าง</span>
+                        <p>50.00฿</p>
+                    </p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" class="toggle-checkbox" onchange="toggleShop(this)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <p class="menu-item">
+                        <button class="shop-btn">แก้ไข</button>
+                        <button class="edit-shop-btn">ลบ</button>
+                    </p>
+                </a>
+            </div>
         </div>
-        <div class="footer-item">
-            <i class="fa-solid fa-file-alt"></i>
-        </div>
-        <div class="footer-item">
-            <i class="fa-solid fa-cart-shopping"></i>
-        </div>
-        <div class="footer-item notification">
-            <i class="fa-solid fa-bell"></i>
-            <span class="notification-badge"></span>
-        </div>
-    </footer>
+
+        <footer class="details-bottom">
+            <a href="#" class="reorder-button">เพิ่มสินค้าใหม่</a>
+        </footer>
 </body>
 
 </html>

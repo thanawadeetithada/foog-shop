@@ -1,10 +1,18 @@
+<?php
+            session_start();
+            if (isset($_SESSION['error_message'])) {
+                echo "<p style='color:red;'>" . $_SESSION['error_message'] . "</p>"; //เบอร์โทรไม่ถูกต้อง
+                unset($_SESSION['error_message']); // ลบข้อความหลังแสดง
+            }
+        ?>
 <!DOCTYPE html>
 <html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบผู้ใช้</title>
+    <title>เข้าสู่ระบบ</title>
+    <!-- <link rel="stylesheet" href="user_login.css"> -->
     <style>
     * {
         margin: 0;
@@ -48,9 +56,13 @@
         /* เงาที่ลึกขึ้นเมื่อชี้ไปที่กล่อง */
     }
 
-    .login-wrapper h2 {
+    h2 {
+        color: #000;
+        /* สีข้อความ */
         font-size: 2rem;
-        color: black;
+        /* ขนาดของหัวข้อหลัก */
+        margin-bottom: 1rem;
+        /* ระยะขอบด้านล่าง */
     }
 
     form input[type="text"],
@@ -59,7 +71,7 @@
         /* ความกว้าง 100% */
         padding: 0.75rem;
         /* ระยะขอบภายใน */
-        margin: 0.8rem 0;
+        margin: 0.5rem 0;
         /* ระยะขอบด้านบนและด้านล่าง */
         border-radius: 25px;
         /* มุมมน */
@@ -98,7 +110,7 @@
         /* ขนาดฟอนต์ */
         cursor: pointer;
         /* แสดงเคอร์เซอร์เป็นปุ่ม */
-        margin-top: 0.8rem;
+        margin-top: 1rem;
         /* ระยะขอบด้านบน */
         transition: background-color 0.3s ease;
         /* การเปลี่ยนแปลงสีพื้นหลังแบบเรียบ */
@@ -199,7 +211,7 @@
     <div class="login-wrapper">
         <h2 class="login-title">เข้าสู่ระบบ</h2>
         <div class="login-container">
-            <form action="user_login_db.php" method="POST">
+            <form action="login_db.php" method="POST">
                 <input type="text" name="phone" placeholder="เบอร์โทร" required>
                 <input type="password" name="password" placeholder="รหัสผ่าน" required>
                 <div class="forgot-password">
@@ -207,8 +219,7 @@
                 </div>
                 <button type="submit">เข้าสู่ระบบ</button>
             </form>
-            <br>
-            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br><br><a href="user_register.php">ลงทะเบียน</a></p>
+            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br><a href="user_register.php">ลงทะเบียน</a></p>
         </div>
     </div>
 </body>

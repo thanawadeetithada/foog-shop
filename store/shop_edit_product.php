@@ -69,15 +69,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     .login-container {
-    background-color: #FDDF59;
-    padding: 2rem;
-    width: 90%;
-    max-width: 400px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-    transition: box-shadow 0.3s ease;
-}
+        display: flex;
+        align-items: center;
+        align-content: space-between;
+        justify-content: center;
+        padding: 2rem;
+        width: 90%;
+        transition: box-shadow 0.3s ease;
+    }
 
     .login-container:hover {
         box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
@@ -95,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         padding: 0.75rem;
         margin: 0.5rem 0;
         border-radius: 25px;
-        border: 1px solid #ccc;
+        border: 1px solid black;
         outline: none;
         font-size: 1rem;
         color: #333;
@@ -110,9 +109,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     form button {
         width: 100%;
         padding: 0.75rem;
-        background-color: #fff;
+        background-color: #00bf62;
         color: #000;
-        border: 2px solid #000;
+        border: 0px;
+        border-radius: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .cancel {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #e93125;
+        color: #000;
+        border: 0px;
         border-radius: 25px;
         font-size: 1rem;
         cursor: pointer;
@@ -154,51 +166,102 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     .login-title {
-        color: #000; 
+        color: #000;
         font-size: 2rem;
         margin-bottom: 2rem;
-        text-align: left; 
+        text-align: left;
         width: 100%;
         padding-left: 20px;
     }
 
     .login-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 13rem;
-    height: 100vh;
-   
-}
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
 
-.top-tab {
-    width: 100%;
-    padding: 30px;
-    background-color: #FDDF59;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-}
+    }
+
+    .top-tab {
+        width: 100%;
+        padding: 30px;
+        background-color: #FDDF59;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+    }
+
+    .import-img {
+        width: 100%;
+        padding: 0.6rem;
+        margin: 0.5rem 0;
+        border-radius: 25px;
+        border: 1px solid black;
+        outline: none;
+        font-size: 1rem;
+        color: #333;
+        transition: border 0.3s ease;
+    }
+
+    .header {
+        margin-top: 2rem;
+        color: #333;
+        padding: 0px;
+        font-size: 1.5em;
+    }
+
+    .option-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .option-row .option {
+        width: 70%;
+    }
+
+    .option-row .extra {
+        width: 30%
+    }
     </style>
 </head>
 
 <body>
-    <div class="top-tab"></div>
     <div class="login-wrapper">
-    <h2 class="login-title">ลงทะเบียน</h2>
-
+        <div class="header">แก้ไขสินค้า</div>
         <div class="login-container">
             <form action="user_register.php" method="POST">
-                <input type="text" name="shop_name" placeholder="เบอร์โทร" required>
-                <!-- <input type="text" name="owner_name" placeholder="ชื่อเจ้าของร้าน" required>
-                <input type="text" name="phone" placeholder="เบอร์โทร" required> -->
-                <input type="password" name="password" placeholder="รหัสผ่าน" required>
-                <br><br>
-                <button type="submit">ลงทะเบียน</button>
+                <span>ชื่อสินค้า : </span>
+                <input type="text" name="shop_name" placeholder="ข้าวมันไก่ต้ม" required>
+                <span>ราคา (บาท) : </span>
+                <input type="text" name="owner_name" placeholder="50" required>
+                <div class="option-row">
+                    <span>ตัวเลือกเพิ่มเติม :</span>
+                    <span>ค่าใช้จ่ายเพิ่มเติม :</span>
+                </div>
+                <div class="option-row">
+                    <input class="option" type="text" name="option1" placeholder="ธรรมดา" required>
+                    <input class="extra" type="text" name="extra2" placeholder="0" required>
+                </div>
+                <div class="option-row">
+                    <input class="option" type="text" name="option2" placeholder="พิเศษ" required>
+                    <input class="extra" type="text" name="extra2" placeholder="10" required>
+                </div>
+
+                <span>รูปภาพสินค้า : </span>
+                <div class="import-img">
+                    <input type="file" name="payment_proof" id="payment_proof" required>
+                </div>
+                <span>หมายเหตุ : </span>
+                <input type="text" name="owner_name" placeholder="เช่น ข้าวน้อย, ไม่เอาแตงกวา" required>
+                <br>
+                <button type="submit">บันทึก</button>
+                <button class="cancel" type="submit">ยกเลิก</button>
+
             </form>
             <br>
-            <a href="user_login.php">เข้าสู่ระบบ</a>
         </div>
     </div>
 </body>

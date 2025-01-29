@@ -255,7 +255,7 @@ if ($result && $result->num_rows > 0) {
                 </div>
                 <div class="details">
                     <span class="order"><strong>Order : 002</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านกาแฟโบราณ</strong></span>
+                    <span class="order"><strong>ร้านลูกชิ้นทอด</strong></span>
                     <br>
                     <span class="status">เสร็จสิ้นแล้ว</span>
                 </div>              

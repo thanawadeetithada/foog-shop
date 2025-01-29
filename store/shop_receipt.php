@@ -105,16 +105,12 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
     .reorder-button {
         display: block;
         text-align: center;
-        background-color: #ffd700;
+        background-color: #d1cdcc;
         color: #333;
         text-decoration: none;
         padding: 10px;
         border-radius: 15px;
         font-size: 1.2rem;
-    }
-
-    .reorder-button:hover {
-        background-color: #ffc107;
     }
 
     .step {
@@ -132,10 +128,9 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
         flex-grow: 1;
         height: 2px;
         margin: 0 10px;
-        border-top: 5px dotted #0FBE19;
+        border-top: 5px dotted #ddd;
         margin-bottom: 25px;
     }
-
 
     .step .line.active {
         border-top: 5px dotted #0FBE19;
@@ -152,7 +147,7 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
 
     .top-tab {
         width: 100%;
-        padding: 30px;
+        padding: 20px;
         background-color: #FDDF59;
         position: fixed;
         top: 0;
@@ -192,56 +187,34 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
 </head>
 
 <body>
-    <div class="top-tab"></div>
+    <div class="top-tab">
+    <i class="fa-solid fa-arrow-left"></i>
+    </div>
 
     <div class="container">
         <div class="order-content">
-            <div class="header">อาหารเสร็จสิ้นแล้ว</div>
+            <div class="header">รายการคำสั่งซื้อ</div>
             <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="step">
-                <?php
-                $status = $row['status'];
-                $step_class = ['active', 'active', 'active', '', ''];
-                if ($status == 'กำลังเตรียม') {
-                    $step_class = ['active', 'active', 'active', 'active', ''];
-                } elseif ($status == 'กำลังจัดส่ง') {
-                    $step_class = ['active', 'active', 'active', 'active', 'active'];
-                }
-            ?>
-                <div class="circle <?= $step_class[0] ?>">
-                    <i class="fa-solid fa-circle-check" style="color: #0FBE19;"></i>
-                    <span>รับออเดอร์</span>
-                </div>
-                <div class="line <?= $step_class[1] ?>"></div>
-                <div class="circle <?= $step_class[2] ?>">
-                    <i class="fa-solid fa-circle-check" style="color: #0FBE19;"></i>
-                    <span>กำลังเตรียม</span>
-                </div>
-                <div class="line <?= $step_class[3] ?>"></div>
-                <div class="circle <?= $step_class[4] ?>">
-                    <i class="fa-solid fa-circle-check" style="color: #0FBE19;"></i>
-                    <span>เสร็จสิ้นแล้ว</span>
-                </div>
-            </div>
+           
             <div class="details">
                 <div class="order-info">
-                    <span><strong><?= htmlspecialchars($row['created_at']) ?></strong></span>
-                    <span class="order-right"><strong>Order : <?= $row['id'] ?></strong></span>
+                    <span><strong>16 ธ.ค. 67, 11:45</strong></span>
+                    <span class="order-right"><strong>Order : 001</strong></span>
                 </div>
                 <span style="display: inline-flex;align-items: center;margin-bottom: 10px;">
                     <i class="fa-solid fa-circle-user" style="margin-right: 5px;"></i>
-                    <strong><?= !empty($row['phone']) ? htmlspecialchars($row['phone']) : 'ไม่มีข้อมูล'; ?></strong>
+                    <strong>0616519783</strong>
                 </span>
                 <hr>
                 <ul>
-                    <span><strong>รายการคำสั่งซื้อ</strong></span>
                     <li style="display: flex; justify-content: space-between;margin-top: 20px;">
                         <span style="width: 50%;">ข้าวมันไก่ต้ม</span>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; width: 25%;">
                             <span>50.00฿</span>
-                            <span>x2</span>
+                            <span>x1</span>
                         </div>
                     </li>
+                    <span style="color:#e1e1e1;">หมายเหตุ : - </span>
                 </ul>
             </div>
             <?php endwhile; ?>
@@ -250,7 +223,7 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
         <div class="details-bottom">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin-bottom: 0px;"><strong>ยอดชำระ</strong></h2>
-                <h2 style="color: red; margin-bottom: 0px;"><strong>100.00฿</strong></h2>
+                <h2 style="color: red; margin-bottom: 0px;"><strong>50.00฿</strong></h2>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p><strong>วิธีการชำระ</strong></p>
@@ -258,7 +231,7 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
             </div>
             <hr>
             <br>
-            <a href="#" class="reorder-button">สั่งซื้ออีกครั้ง</a>
+            <a href="#" class="reorder-button">เรียบร้อย</a>
         </div>
 
     </div>

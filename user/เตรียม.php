@@ -248,12 +248,12 @@ $total_price = array_sum(array_column($cart, 'total_price')); // คำนวณ
 
         <div class="details-bottom">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2><strong>ยอดรวมชำระ</strong></h2>
-                <h2 style="color: red"><strong>100.00฿</strong></h2>
+                <h2 style="margin-bottom: 0px;"><strong>ยอดชำระ</strong></h2>
+                <h2 style="color: red; margin-bottom: 0px;"><strong>100.00฿</strong></h2>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p><strong>วิธีการชำระ</strong></p>
-                <p><strong>QR Promptpay</strong></p>
+                <p>QR Promptpay</p>
             </div>
             <hr>
             <br>

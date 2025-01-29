@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบผู้ใช้</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous">
+    </script>
     <style>
     * {
         margin: 0;
@@ -13,7 +15,7 @@
         /* ไม่มีระยะขอบภายใน */
         box-sizing: border-box;
         /* ให้ขนาดรวมระยะขอบและการ padding */
-        color: blue;
+        color: black;
     }
 
     body {
@@ -51,6 +53,7 @@
     .login-wrapper h2 {
         font-size: 2rem;
         color: black;
+        text-align: center;
     }
 
     form input[type="text"],
@@ -81,32 +84,29 @@
         /* เปลี่ยนสีกรอบเมื่อมีการโฟกัส */
     }
 
-    form button {
+    form .btn-confirm {
         width: 100%;
-        /* ความกว้าง 100% */
         padding: 0.75rem;
-        /* ระยะขอบภายใน */
-        background-color: #fff;
-        /* สีพื้นหลังของปุ่ม */
+        background-color: #00BD5F;
         color: #000;
-        /* สีข้อความของปุ่ม */
-        border: 2px solid #000;
-        /* กรอบสีดำ */
+        border: 0px;
         border-radius: 25px;
-        /* มุมมน */
         font-size: 1rem;
-        /* ขนาดฟอนต์ */
         cursor: pointer;
-        /* แสดงเคอร์เซอร์เป็นปุ่ม */
         margin-top: 0.8rem;
-        /* ระยะขอบด้านบน */
-        transition: background-color 0.3s ease;
-        /* การเปลี่ยนแปลงสีพื้นหลังแบบเรียบ */
     }
 
-    form button:hover {
-        background-color: #f0f0f0;
-        /* สีพื้นหลังเมื่อชี้เมาส์ */
+    
+    form .btn-cancel {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #d43e3f;
+        color: #000;
+        border: 0px;
+        border-radius: 25px;
+        font-size: 1rem;
+        cursor: pointer;
+        margin-top: 0.8rem;
     }
 
     .forgot-password {
@@ -177,38 +177,30 @@
 
     .top-tab {
         width: 100%;
-        /* ความกว้างเต็มหน้าจอ */
-        padding: 30px;
-        /* ระยะห่างด้านใน 20px */
+        padding: 20px;
         background-color: #FDDF59;
-        /* สีพื้นหลังของแท็บ */
         position: fixed;
-        /* ตรึงไว้ที่ด้านบน */
         top: 0;
-        /* ให้ติดด้านบนของหน้าจอ */
         left: 0;
-        /* ชิดซ้ายสุด */
         z-index: 1000;
-        /* ให้ซ้อนอยู่บนสุด */
     }
     </style>
 </head>
 
 <body>
-    <div class="top-tab"></div>
+    <div class="top-tab">
+    <i class="fa-solid fa-arrow-left"></i>
+    </div>
     <div class="login-wrapper">
-        <h2 class="login-title">เข้าสู่ระบบ</h2>
+        <h2 class="login-title">แก้ไขข้อมูลร้านค้า</h2>
         <div class="login-container">
             <form action="user_login_db.php" method="POST">
-                <input type="text" name="phone" placeholder="เบอร์โทร" required>
-                <input type="password" name="password" placeholder="รหัสผ่าน" required>
-                <div class="forgot-password">
-                    <a href="forgot_password.php">ลืมรหัสผ่าน ?</a>
-                </div>
-                <button type="submit">เข้าสู่ระบบ</button>
+                <input type="text" name="phone" placeholder="ชื่อร้าน" required>
+                <input type="password" name="password" placeholder="ชื่อเจ้าของร้าน" required>
+                <input type="password" name="password" placeholder="หมวดหมู่" required>
+                <button class="btn-confirm" type="submit">ยืนยัน</button>
+                <button class="btn-cancel"type="button">ยกเลิก</button>
             </form>
-            <br>
-            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br><br><a href="user_register.php">ลงทะเบียน</a></p>
         </div>
     </div>
 </body>
