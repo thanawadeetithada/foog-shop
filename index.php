@@ -135,7 +135,10 @@
                 </div>
                 <button type="submit">เข้าสู่ระบบ</button>
             </form>
-            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br><a href="register.php">ลงทะเบียน</a></p>
+            <p>คุณมีแอคเคาท์แล้วหรือยัง? <br>
+            <br>
+            <a href="shop_register.php">ลงทะเบียนเป็นร้านค้า</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="register.php">ลงทะเบียนเป็นลูกค้า</a></p>
         </div>
     </div>
 </body>
