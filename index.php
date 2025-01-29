@@ -124,7 +124,7 @@
     <div class="login-wrapper">
         <h2 class="login-title">เข้าสู่ระบบ</h2>
         <div class="login-container">
-            <form action="db/login_db.php" method="POST">
+            <form action="login_db.php" method="POST">
                 <input type="tel" name="phone" placeholder="เบอร์โทร" required pattern="[0-9]{10}" maxlength="10"
                     oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.setCustomValidity('');"
                     oninvalid="this.setCustomValidity('กรุณาใส่เบอร์โทรให้ถูกต้อง (ตัวเลข 10 หลัก)');">

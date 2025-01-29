@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../db.php';
+include 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone'];
@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        echo "<script>alert('เบอร์โทรนี้ถูกใช้แล้ว!'); window.location.href = '../register.php';</script>";
+        echo "<script>alert('เบอร์โทรนี้ถูกใช้แล้ว!'); window.location.href = 'shop_register.php';</script>";
     } else {
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ss", $phone, $hashed_password);
 
         if ($stmt->execute()) {
-            echo "<script>alert('ลงทะเบียนสำเร็จ!'); window.location.href = '../index.php';</script>";
+            echo "<script>alert('ลงทะเบียนสำเร็จ!');</script>";
         } else {
             echo "เกิดข้อผิดพลาด: " . $stmt->error;
         }

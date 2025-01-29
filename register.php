@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบผู้ใช้</title>
+    <title>ลงทะเบียน</title>
     <style>
     * {
         margin: 0;
@@ -126,7 +126,7 @@
         <h2 class="login-title">ลงทะเบียน</h2>
 
         <div class="login-container">
-            <form action="db/user_register_db.php" method="POST">
+            <form action="user_register_db.php" method="POST">
                 <input type="tel" name="phone" placeholder="เบอร์โทร" required pattern="[0-9]{10}" maxlength="10"
                     oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.setCustomValidity('');"
                     oninvalid="this.setCustomValidity('กรุณาใส่เบอร์โทรให้ถูกต้อง (ตัวเลข 10 หลัก)');">
