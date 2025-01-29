@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone'];
     $password = $_POST['password'];
 
-    $sql = "SELECT * FROM Users WHERE phone = ?";
+    $sql = "SELECT * FROM users WHERE phone = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $phone);
     $stmt->execute();
@@ -38,6 +38,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     $stmt->close();
+    $conn->close();
 }
-$conn->close();
 ?>
