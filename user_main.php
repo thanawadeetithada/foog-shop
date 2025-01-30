@@ -1,3 +1,11 @@
+<?php
+include 'db.php'; // ใช้ไฟล์เชื่อมต่อฐานข้อมูล
+
+// ดึงข้อมูลจากตาราง stores
+$sql = "SELECT store_id, store_name, image_url FROM stores";
+$store_result = $conn->query($sql);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -321,18 +329,22 @@
     <div class="recommended">
         <h3>ร้านแนะนำ</h3>
         <div class="shops">
-            <?php while ($store_row = $store_result->fetch_assoc()): ?>
-            <div class="shop">
-                <a href="store_products.php?store_id=<?php echo $store_row['id']; ?>">
-                    <?php
-                $image_path = !empty($store_row['image']) && file_exists($store_row['image']) ? $store_row['image'] : 'default_image.jpg';
-            ?>
-                    <img src="<?php echo htmlspecialchars($image_path); ?>"
-                        alt="<?php echo htmlspecialchars($store_row['name']); ?>" />
-                    <p><?php echo htmlspecialchars($store_row['name']); ?></p>
-                </a>
-            </div>
-            <?php endwhile; ?>
+            <?php if ($store_result->num_rows > 0): ?>
+                <?php while ($store_row = $store_result->fetch_assoc()): ?>
+                    <div class="shop">
+                        <a href="store_products.php?store_id=<?php echo $store_row['store_id']; ?>">
+                            <?php
+                            $image_path = !empty($store_row['image_url']) ? $store_row['image_url'] : 'default_image.jpg';
+                            ?>
+                            <img src="<?php echo htmlspecialchars($image_path); ?>"
+                                alt="<?php echo htmlspecialchars($store_row['store_name']); ?>" />
+                            <p><?php echo htmlspecialchars($store_row['store_name']); ?></p>
+                        </a>
+                    </div>
+                <?php endwhile; ?>
+                <?php else: ?>
+                <p>ไม่มีร้านค้าแนะนำ</p>
+            <?php endif; ?>
         </div>
     </div>
 
