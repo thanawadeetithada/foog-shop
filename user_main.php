@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,7 +27,7 @@
     }
 
     .header form {
-        margin: 0  10px  0 0px;
+        margin: 0 10px 0 0px;
         align-items: center;
         justify-content: center;
         width: 80%;
@@ -288,8 +287,10 @@
                 <button type="submit"><i class="fas fa-search"></i></button>
             </div>
         </form>
-        <i class="fa-solid fa-circle-user"></i>
-        </div>
+        <a href="logout.php">
+            <i class="fa-solid fa-circle-user"></i>
+        </a>
+    </div>
 
     <!-- Banner Section -->
     <div class="banner">

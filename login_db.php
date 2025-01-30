@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: user_main.php");
                 exit();
             } elseif ($user['role'] == "admin") {
-                header("Location: admin_main.php");
+                header("Location: admin_add_shop.php");
                 exit();
             } elseif ($user['role'] == "store_owner") {
                 header("Location: shop_main.php");

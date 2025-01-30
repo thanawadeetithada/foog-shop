@@ -89,12 +89,27 @@ $sales_data = [40, 55, 65, 75, 90];
 
     .top-tab {
         width: 100%;
-        padding: 30px;
+        padding: 15px;
         background-color: #FDDF59;
         position: fixed;
         top: 0;
         left: 0;
         z-index: 1000;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .top-tab a {
+        text-decoration: none;
+    }
+
+    .top-tab svg {
+        cursor: pointer;
+        font-size: 1.8rem;
+        color: #ffffff;
+        background-color: #ccc;
+        border-radius: 15px;
     }
 
     button {
@@ -210,7 +225,11 @@ $sales_data = [40, 55, 65, 75, 90];
 </head>
 
 <body>
-    <div class="top-tab"></div>
+    <div class="top-tab">
+        <a href="logout.php">
+            <i class="fa-solid fa-circle-user"></i>
+        </a>
+    </div>
 
 
     <div class="container">
@@ -229,7 +248,10 @@ $sales_data = [40, 55, 65, 75, 90];
             </div>
             <?php if ($role == 'admin') : ?>
             <div class="col text-end">
-                <button>แก้ไขข้อมูล</button>
+                <button
+                    onclick="window.location.href='admin_add_shop.php?store_id=<?php echo htmlspecialchars($store_id, ENT_QUOTES, 'UTF-8'); ?>';">
+                    แก้ไขข้อมูล
+                </button>
             </div>
             <?php endif; ?>
         </div>

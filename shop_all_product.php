@@ -2,7 +2,7 @@
 session_start();
 include 'db.php';
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'store_owner' || !isset($_SESSION['store_id'])) {
+if (!isset($_SESSION['user_id']) || (!in_array($_SESSION['role'], ['store_owner', 'admin'])) || !isset($_SESSION['store_id'])) {
     header('Location: index.php'); 
     exit();
 }
@@ -259,7 +259,7 @@ $result = $stmt->get_result();
 
 <body>
     <div class="header">
-        <i class="fa-solid fa-arrow-left"></i>&nbsp;&nbsp;
+    <i class="fa-solid fa-arrow-left" onclick="window.history.back();" style="cursor: pointer;"></i>&nbsp;&nbsp;
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"

@@ -23,7 +23,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $category = $_POST['category'];
 
+    // ตรวจสอบหมวดหมู่ว่ามีค่าถูกต้องหรือไม่
+    $allowed_categories = ['อาหาร', 'เครื่องดื่ม', 'ของหวาน', 'อื่นๆ'];
+    if (!in_array($category, $allowed_categories)) {
+        echo "<script>alert('หมวดหมู่ไม่ถูกต้อง'); window.history.back();</script>";
+        exit();
+    }
+
+    // ตรวจสอบว่าหมายเลขโทรศัพท์ถูกใช้ไปแล้วหรือยัง
     $check_stmt = $conn->prepare("SELECT phone FROM users WHERE phone = ?");
+    if (!$check_stmt) {
+        die("Query failed: " . $conn->error);
+    }
     $check_stmt->bind_param("s", $phone);
     $check_stmt->execute();
     $check_stmt->store_result();
@@ -33,6 +44,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
     $check_stmt->close();
+
+    // ตรวจสอบการอัปโหลดไฟล์
+    if ($_FILES["image"]["error"] !== UPLOAD_ERR_OK) {
+        echo "<script>alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์!'); window.history.back();</script>";
+        exit();
+    }
 
     $target_dir = "uploads/";
     $image_file = basename($_FILES["image"]["name"]);
@@ -50,24 +67,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
+    // เพิ่มข้อมูลผู้ใช้ลงในตาราง users
     $stmt = $conn->prepare("INSERT INTO users (phone, password, role) VALUES (?, ?, 'store_owner')");
+    if (!$stmt) {
+        die("Query failed: " . $conn->error);
+    }
     $stmt->bind_param("ss", $phone, $password);
     if ($stmt->execute()) {
         $owner_id = $conn->insert_id;
 
+        // เพิ่มข้อมูลร้านค้าในตาราง stores
         $stmt = $conn->prepare("INSERT INTO stores (store_name, owner_id, owner_name, category, phone, image_url) VALUES (?, ?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            die("Query failed: " . $conn->error);
+        }
         $stmt->bind_param("sissss", $store_name, $owner_id, $owner_name, $category, $phone, $image_url);
         if ($stmt->execute()) {
             echo "<script>alert('ลงทะเบียนร้านค้าเรียบร้อย!'); window.location.href = 'index.php';</script>";
             exit();
         } else {
-            echo "<script>alert('เกิดข้อผิดพลาดในการลงทะเบียนร้านค้า'); window.history.back();</script>";
+            echo "<script>alert('เกิดข้อผิดพลาดในการลงทะเบียนร้านค้า: " . $stmt->error . "'); window.history.back();</script>";
         }
     } else {
-        echo "<script>alert('เกิดข้อผิดพลาดในการสร้างบัญชีเจ้าของร้าน'); window.history.back();</script>";
+        echo "<script>alert('เกิดข้อผิดพลาดในการสร้างบัญชีเจ้าของร้าน: " . $stmt->error . "'); window.history.back();</script>";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="th">
 
@@ -76,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $title_text; ?></title>
     <style>
-   * {
+    * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -223,7 +249,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="login-wrapper">
         <h2 class="login-title"><?php echo $title_text; ?></h2>
         <div class="login-container">
-            <form method="POST" action="" enctype="multipart/form-data">
+            <form method="POST" action="" enctype="multipart/form-data" id="storeForm">
                 <input type="text" name="store_name" placeholder="ชื่อร้าน" required>
                 <input type="text" name="owner_name" placeholder="ชื่อเจ้าของร้าน" required>
                 <input type="tel" name="phone" placeholder="เบอร์โทร" required pattern="[0-9]{10}" maxlength="10"
@@ -240,25 +266,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="import-img">
                     <input type="file" name="image" id="image" required>
                 </div>
-                <button type="submit"><?php echo ($role === 'admin') ? "เพิ่มร้านค้า" : "ลงทะเบียน"; ?></button>
+                <button type="submit"
+                    id="submitButton"><?php echo ($role === 'admin') ? "เพิ่มร้านค้า" : "ลงทะเบียน"; ?></button>
             </form>
             <br>
             <?php if ($role !== 'admin') : ?>
-                <a href="index.php">เข้าสู่ระบบ</a>
+            <a href="index.php">เข้าสู่ระบบ</a>
             <?php endif; ?>
         </div>
     </div>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            let select = document.querySelector("select[name='category']");
-            select.addEventListener("change", function () {
-                if (this.value === "") {
-                    this.style.color = "#757575";
-                } else {
-                    this.style.color = "#333";
-                }
-            });
+    document.addEventListener("DOMContentLoaded", function() {
+        let form = document.getElementById("storeForm");
+        let button = document.getElementById("submitButton");
+
+        button.addEventListener("click", function(event) {
+            <?php if ($role === 'admin') : ?>
+            event.preventDefault();
+            form.action = "admin_add_shop.php";
+            form.submit();
+            <?php endif; ?>
         });
+
+        let select = document.querySelector("select[name='category']");
+        select.addEventListener("change", function() {
+            if (this.value === "") {
+                this.style.color = "#757575";
+            } else {
+                this.style.color = "#333";
+            }
+        });
+    });
     </script>
 </body>
 
