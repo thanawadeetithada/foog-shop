@@ -1,9 +1,24 @@
 <?php
-include 'db.php'; // ใช้ไฟล์เชื่อมต่อฐานข้อมูล
+include 'db.php';
 
-// ดึงข้อมูลจากตาราง stores
-$sql = "SELECT store_id, store_name, image_url FROM stores";
-$store_result = $conn->query($sql);
+// รับค่าหมวดหมู่จาก GET
+$category = isset($_GET['category']) ? $_GET['category'] : '';
+
+// สร้าง SQL query เพื่อกรองร้านค้าตามหมวดหมู่
+if ($category) {
+    // ถ้ามีการกรองหมวดหมู่
+    $sql = "SELECT store_id, store_name, user_name, category, phone, image_url FROM stores WHERE category = ?";
+} else {
+    // ถ้าไม่มีการกรองหมวดหมู่
+    $sql = "SELECT store_id, store_name, user_name, category, phone, image_url FROM stores";
+}
+
+$stmt = $conn->prepare($sql);
+if ($category) {
+    $stmt->bind_param("s", $category); // กรณีที่มีการกรองหมวดหมู่
+}
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -25,7 +40,7 @@ $store_result = $conn->query($sql);
         background-color: #fff;
     }
 
-    .header {
+    .top-tab {
         background-color: #FFDE59;
         padding: 10px;
         display: flex;
@@ -34,24 +49,19 @@ $store_result = $conn->query($sql);
         text-align: center;
     }
 
-    .header form {
+    .top-tab form {
         margin: 0 10px 0 0px;
         align-items: center;
         justify-content: center;
         width: 80%;
     }
 
-    .header input {
+    .top-tab input {
         border: none;
         padding: 10px;
         border-radius: 20px;
         width: 70%;
         font-size: 14px;
-    }
-
-    .header .user-icon {
-        height: 30px;
-        cursor: pointer;
     }
 
     .banner {
@@ -75,10 +85,6 @@ $store_result = $conn->query($sql);
         background-color: white;
     }
 
-    .category {
-        text-align: center;
-    }
-
     .category button {
         background: #FFDE59;
         border: none;
@@ -94,11 +100,6 @@ $store_result = $conn->query($sql);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
-    .category button i {
-        font-size: 2rem;
-        /* ขนาดไอคอน */
-        color: #333;
-    }
 
     .category p {
         margin-top: 8px;
@@ -116,18 +117,6 @@ $store_result = $conn->query($sql);
         text-align: center;
     }
 
-    .category img {
-        width: 50px;
-        height: 50px;
-    }
-
-    .category p {
-        margin-top: 5px;
-        font-size: 14px;
-        color: #333;
-    }
-
-    /* Recommended Shops Section */
     .recommended {
         margin: 0px 20px 20px 20px;
     }
@@ -149,7 +138,7 @@ $store_result = $conn->query($sql);
     .shop {
         text-align: center;
         background: #f9f9f9;
-        padding: 10px;
+        padding: 10px 10px 25px;
         border-radius: 10px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         max-width: 100%;
@@ -161,6 +150,13 @@ $store_result = $conn->query($sql);
         height: 100%;
         max-height: 100px;
         border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .shop a {
+        text-decoration: none;
+        color: black;
+        margin-bottom: 20px !important;
     }
 
     /* Footer Section */
@@ -213,26 +209,6 @@ $store_result = $conn->query($sql);
         border-radius: 50%;
     }
 
-    .footer div {
-        text-align: center;
-    }
-
-    .footer img {
-        width: 30px;
-    }
-
-    .footer p {
-        margin-top: 5px;
-        font-size: 12px;
-    }
-
-    .footer button {
-        background: none;
-        border: none;
-        font-size: 1.5em;
-        cursor: pointer;
-    }
-
     .search-form {
         width: 100%;
         max-width: 500px;
@@ -266,28 +242,17 @@ $store_result = $conn->query($sql);
         color: #555;
     }
 
-    .search-box button i {
-        font-size: 16px;
-    }
-
-    a {
-        text-decoration: none;
-        color: black;
-    }
-
     .fa-circle-user {
         font-size: 1.8rem;
         color: #ffffff;
         background-color: #ccc;
-        /* border: 1px solid #ccc; */
         border-radius: 15px;
     }
     </style>
 </head>
 
 <body>
-    <!-- Header Section -->
-    <div class="header">
+    <div class="top-tab">
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"
@@ -300,71 +265,69 @@ $store_result = $conn->query($sql);
         </a>
     </div>
 
-    <!-- Banner Section -->
     <div class="banner">
         <img src="img/RMUTPFOOD.jpg" alt="RMUTP Food" class="banner-img">
     </div>
 
-    <!-- Categories Section -->
     <nav class="categories">
         <div class="category">
-            <button><i class="fa-solid fa-utensils"></i></button>
+            <a href="user_main.php?category=อาหาร"><button><i class="fa-solid fa-utensils"></i></button></a>
             <p>อาหาร</p>
         </div>
         <div class="category">
-            <button><i class="fa-solid fa-mug-hot"></i></button>
+            <a href="user_main.php?category=เครื่องดื่ม"><button><i class="fa-solid fa-mug-hot"></i></button></a>
             <p>เครื่องดื่ม</p>
         </div>
         <div class="category">
-            <button><i class="fa-solid fa-ice-cream"></i></button>
+            <a href="user_main.php?category=ของทานเล่น"><button><i class="fa-solid fa-ice-cream"></i></button></a>
             <p>ของทานเล่น</p>
         </div>
         <div class="category">
-            <button><i class="fa-solid fa-table-cells-large"></i></button>
+            <a href="user_main.php?category=อื่นๆ"><button><i class="fa-solid fa-table-cells-large"></i></button></a>
             <p>อื่นๆ</p>
         </div>
     </nav>
 
-    <!-- Recommended Shops Section -->
+
     <div class="recommended">
-        <h3>ร้านแนะนำ</h3>
+        <h3>ร้านค้าทั้งหมด</h3>
         <div class="shops">
-            <?php if ($store_result->num_rows > 0): ?>
-                <?php while ($store_row = $store_result->fetch_assoc()): ?>
-                    <div class="shop">
-                        <a href="store_products.php?store_id=<?php echo $store_row['store_id']; ?>">
-                            <?php
-                            $image_path = !empty($store_row['image_url']) ? $store_row['image_url'] : 'default_image.jpg';
-                            ?>
-                            <img src="<?php echo htmlspecialchars($image_path); ?>"
-                                alt="<?php echo htmlspecialchars($store_row['store_name']); ?>" />
-                            <p><?php echo htmlspecialchars($store_row['store_name']); ?></p>
-                        </a>
-                    </div>
-                <?php endwhile; ?>
-                <?php else: ?>
-                <p>ไม่มีร้านค้าแนะนำ</p>
-            <?php endif; ?>
+            <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $image_url = htmlspecialchars($row['image_url']); 
+                $store_name = htmlspecialchars($row['store_name']);
+                $store_id = htmlspecialchars($row['store_id']);
+
+                echo '<div class="shop" onclick="location.href=\'user_detail_shop.php?store_id=' . $store_id . '\'">
+                <img src="' . $image_url . '" alt="' . $store_name . '">
+                <a href="user_detail_shop.php?store_id=' . $store_id . '">' . $store_name . '</a>
+            </div>';
+            }
+        } else {
+            echo "<p>ไม่มีร้านค้า</p>";
+        }
+        ?>
         </div>
     </div>
 
-    <!-- Footer Section -->
     <footer class="footer">
-        <div class="footer-item active">
+        <div class="footer-item active" onclick="window.location.href='user_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
-        <div class="footer-item">
+        <div class="footer-item" onclick="window.location.href='user_order.php'">
             <i class="fa-solid fa-file-alt"></i>
         </div>
-        <div class="footer-item">
+        <div class="footer-item" onclick="window.location.href='user_cart.php'">
             <i class="fa-solid fa-cart-shopping"></i>
         </div>
-        <div class="footer-item notification">
+        <div class="footer-item notification" onclick="window.location.href='user_notification.php'">
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
     </footer>
+
 </body>
 
 </html>

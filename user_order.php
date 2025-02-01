@@ -1,12 +1,32 @@
+<?php
+session_start(); // เริ่ม session
+include 'db.php'; // เชื่อมต่อฐานข้อมูล
+
+// ตรวจสอบว่ามี user_id ใน session หรือไม่
+if (!isset($_SESSION['user_id'])) {
+    die("คุณยังไม่ได้เข้าสู่ระบบ");
+}
+
+$user_id = $_SESSION['user_id'];
+
+$sql = "SELECT orders_status_id, user_id, total_price, status_order, created_at 
+        FROM orders_status 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
     <title>แจ้งเตือน</title>
     <style>
     /* General Reset */
@@ -14,6 +34,10 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+    }
+
+    .clickable {
+        cursor: pointer;
     }
 
     body {
@@ -243,81 +267,98 @@
         <div class="header">รายการคำสั่งซื้อ</div>
         <main>
 
-            <div class="status-item">
-                <div class="icon">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div class="details">
-                    <div class="row">
-                        <span class="column"><strong>22 ธ.ค. 67, 10:25</strong></span>
-                        <span class="column"><strong>Order : 003</strong></span>
-                        <span class="column"><strong>150฿</strong></span>
-                    </div>
-                    <p class="order"><i
-                            class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x2</span>
-                            <br>
-                            <strong style="margin-left: 20px;">ข้าวมันไก่ทอด</strong>&nbsp;<span>x1</span>
-                    </p>
+            <?php
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        // แปลง timestamp เป็นวันที่อ่านง่าย
+        $date = date("d M Y, H:i", strtotime($row["created_at"]));
+        $orderId = $row["orders_status_id"];
+        $totalPrice = number_format($row["total_price"], 2);
+        $statusOrder = $row["status_order"];
 
-                    <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                    <p class="order-prepare" >กำลังเตรียม</p>
-                </div>
-            </div>
-            <hr>
-            <div class="status-item">
-                <div class="icon">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div class="details">
-                    <div class="row">
-                        <span class="column"><strong>17 ธ.ค. 67, 09:25</strong></span>
-                        <span class="column"><strong>Order : 002</strong></span>
-                        <span class="column"><strong>50฿</strong></span>
-                    </div>
-                    <p class="order"><i
-                            class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ลูกชิ้นทอด</strong>&nbsp;<span>x1</span>
-                    </p>
-                    <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                    <p class="order-confirm">เสร็จสิ้นแล้ว</p>
-                </div>
-            </div>
-            <hr>
-            <div class="status-item">
-                <div class="icon">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div class="details">
-                    <div class="row">
-                        <span class="column"><strong>16 ธ.ค. 67, 11:45</strong></span>
-                        <span class="column"><strong>Order : 001</strong></span>
-                        <span class="column"><strong>50฿</strong></span>
-                    </div>
-                    <p class="order"><i
-                            class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x1</span>
-                    </p>
-                    <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                    <p class="order-confirm">เสร็จสิ้นแล้ว</p>
-                </div>
-            </div>
-            <hr>
+        // ตรวจสอบสถานะออเดอร์
+        if ($statusOrder === "receive") {
+            $statusText = '<p class="order">รับออเดอร์แล้ว</p>';
+        } elseif ($statusOrder === "prepare") {
+            $statusText = '<p class="order-prepare">กำลังเตรียม</p>';
+        } elseif ($statusOrder === "complete") {
+            $statusText = '<p class="order-confirm">เสร็จสิ้นแล้ว</p>';
+        } else {
+            $statusText = '<p class="order" style="color: red;">ร้านยังไม่รับออเดอร์</p>';
+        }
+
+        $items_sql = "SELECT GROUP_CONCAT(CONCAT(p.product_name, ' x ', oi.quantity) SEPARATOR '\n') AS product_names
+        FROM orders_status_items oi
+        LEFT JOIN products p ON oi.product_id = p.product_id
+        WHERE oi.orders_status_id = ?";
+
+$stmt = $conn->prepare($items_sql);
+$stmt->bind_param("i", $orderId);
+$stmt->execute();
+$items_result = $stmt->get_result();
+$productData = $items_result->fetch_assoc();
+$productNames = $productData["product_names"] ?? "ไม่มีสินค้า";
+$stmt->close();
+
+$productNamesArray = explode("\n", $productNames);
+$productNamesWithColor = '';
+
+foreach ($productNamesArray as $index => $productName) {
+    if ($index >= 1) {
+        $productNamesWithColor .= "<span style='margin-left:20px;'>{$productName}</span><br>";
+    } else {
+        $productNamesWithColor .= "{$productName}<br>";
+    }
+}
+
+$clickableClass = 'clickable';
+$orderLink = "onclick=\"window.location.href='user_order_status.php?orders_status_id={$orderId}';\"";
+
+echo "
+<div class='status-item {$clickableClass}' {$orderLink}>
+<div class='icon'>
+  <i class='fa-solid fa-utensils'></i>
+</div>
+<div class='details'>
+  <div class='row'>
+      <span class='column'><strong>{$date}</strong></span>
+      <span class='column'><strong>Order : {$orderId}</strong></span>
+      <span class='column'><strong>{$totalPrice}฿</strong></span>
+  </div>
+  <p class='order'><i class='fa-solid fa-box'></i>&nbsp;<strong>{$productNamesWithColor}</strong></p>
+  {$statusText}
+</div>
+</div>
+<hr>";
+    }
+} else {
+    echo "<p>ไม่มีคำสั่งซื้อ</p>";
+}
+
+$conn->close();
+?>
+
         </main>
+
     </div>
+
     <footer class="footer">
-        <div class="footer-item">
+        <div class="footer-item " onclick="window.location.href='user_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
-        <div class="footer-item active">
+        <div class="footer-item active" onclick="window.location.href='user_order.php'">
             <i class="fa-solid fa-file-alt"></i>
         </div>
-        <div class="footer-item ">
+        <div class="footer-item" onclick="window.location.href='user_cart.php'">
             <i class="fa-solid fa-cart-shopping"></i>
         </div>
-        <div class="footer-item notification">
+        <div class="footer-item notification" onclick="window.location.href='user_notification.php'">
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
     </footer>
+
 </body>
 
 </html>

@@ -159,7 +159,7 @@
         <div class="login-container">
             <form action="user_register.php" method="POST">
                 <input type="text" name="shop_name" placeholder="ชื่อร้าน" required>
-                <input type="text" name="owner_name" placeholder="ชื่อเจ้าของร้าน" required>
+                <input type="text" name="user_name" placeholder="ชื่อเจ้าของร้าน" required>
                 <input type="text" name="phone" placeholder="เบอร์โทร" required>
                 <input type="password" name="password" placeholder="รหัสผ่าน" required>
                 <input type="text" name="phone" placeholder="หมวดหมู่" required>

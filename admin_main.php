@@ -1,7 +1,7 @@
 <?php
 // Mock Data
 $store_name = "ร้านข้าวมันไก่";
-$owner_name = "ปัทมา แก้วปานกัน";
+$user_name = "ปัทมา แก้วปานกัน";
 $order_count = 1;
 $preparing_count = 0;
 $completed_count = 0;
@@ -191,7 +191,7 @@ $sales_data = [40, 55, 65, 75, 90];
                 <h4><?php echo $store_name; ?></h4>
             </div>
             <div class="col text-end">
-                <h5><?php echo $owner_name; ?></h5>
+                <h5><?php echo $user_name; ?></h5>
             </div>
         </div>
 
@@ -258,20 +258,20 @@ $sales_data = [40, 55, 65, 75, 90];
 
 
     <footer class="footer">
-            <div class="footer-item active">
-                <i class="fa-solid fa-house-chimney"></i>&nbsp;
-                <p>HOME</p>
-            </div>
-            <div class="footer-item ">
-                <i class="fa-solid fa-file-alt"></i>
-            </div>
-            <div class="footer-item ">
-                 <i class="fa-solid fa-bell"></i>
-            </div>
-            <div class="footer-item ">
+        <div class="footer-item active" onclick="window.location.href='admin_main.php'">
+            <i class="fa-solid fa-house-chimney"></i>&nbsp;
+            <p>HOME</p>
+        </div>
+        <div class="footer-item" onclick="window.location.href='shop_order.php'">
+            <i class="fa-solid fa-file-alt"></i>
+        </div>
+        <div class="footer-item" onclick="window.location.href='shop_notification.php'">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
-            </div>
-        </footer>
+        </div>
+    </footer>
 
     <!-- Script แสดงกราฟ Chart.js -->
     <script>

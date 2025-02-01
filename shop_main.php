@@ -17,11 +17,11 @@ $stmt->bind_result($role);
 $stmt->fetch();
 $stmt->close();
 
-$sql = "SELECT store_name, owner_name, store_id FROM stores WHERE owner_id = ? LIMIT 1";
+$sql = "SELECT store_name, user_name, store_id FROM stores WHERE user_id = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
-$stmt->bind_result($store_name, $owner_name, $store_id);
+$stmt->bind_result($store_name, $user_name, $store_id);
 $stmt->fetch();
 $stmt->close();
 
@@ -29,11 +29,38 @@ if (empty($store_name)) {
     $store_name = "ไม่พบข้อมูลร้านค้า";
 }
 
-// Mock Data
-$order_count = 1;
-$preparing_count = 0;
-$completed_count = 0;
-$total_sales = 1490;
+// SQL Query สำหรับดึงข้อมูลตามเงื่อนไขที่กำหนด
+$sql = "
+    SELECT 
+        COUNT(CASE WHEN status_order IS NULL OR status_order = 'receive' THEN 1 END) AS order_count,
+        COUNT(CASE WHEN status_order = 'prepare' THEN 1 END) AS preparing_count,
+        COUNT(CASE WHEN status_order = 'complete' THEN 1 END) AS completed_count
+    FROM orders_status 
+    WHERE store_id = ?"; // ใช้ store_id ตรงกับ user_id ที่ล็อกอินเข้ามา
+
+// Prepare และ execute SQL
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $store_id);  // ส่ง store_id ที่ได้จากข้อมูล session
+$stmt->execute();
+$stmt->bind_result($order_count, $preparing_count, $completed_count);
+$stmt->fetch();
+$stmt->close();
+
+$sql = "
+    SELECT SUM(total_price) AS total_sales
+    FROM orders_status 
+    WHERE store_id = ? AND status_order = 'complete'
+";
+
+// Prepare และ execute SQL
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $store_id);  // ส่ง store_id ที่ได้จากข้อมูล session
+$stmt->execute();
+$stmt->bind_result($total_sales);
+$stmt->fetch();
+$stmt->close();
+
+$status_order = isset($_GET['status_order']) ? $_GET['status_order'] : '';
 
 $sales_data = [40, 55, 65, 75, 90];
 ?>
@@ -238,7 +265,7 @@ $sales_data = [40, 55, 65, 75, 90];
                 <h4><?php echo htmlspecialchars($store_name, ENT_QUOTES, 'UTF-8'); ?></h4>
             </div>
             <div class="col text-end">
-                <h5><?php echo htmlspecialchars($owner_name, ENT_QUOTES, 'UTF-8'); ?></h5>
+                <h5><?php echo htmlspecialchars($user_name, ENT_QUOTES, 'UTF-8'); ?></h5>
             </div>
         </div>
 
@@ -261,7 +288,7 @@ $sales_data = [40, 55, 65, 75, 90];
                 <h6>สถานะคำสั่งซื้อ</h6>
             </div>
             <div class="col text-end">
-                <a href="shop_all_product.php" style="text-decoration: none; color: inherit;">
+                <a href="shop_order.php" style="text-decoration: none; color: inherit;">
                     <h6>ดูประวัติการขาย <i class="fa-solid fa-chevron-right"></i></h6>
                 </a>
             </div>
@@ -269,24 +296,31 @@ $sales_data = [40, 55, 65, 75, 90];
 
         <div class="row mt-3">
             <div class="col-4 d-flex flex-column align-items-center">
-                <div class="summary-box">
-                    <span><?php echo $order_count; ?></span>
-                </div>
-                <h6>ออเดอร์</h6>
+                <a href="shop_order.php?status_order=receive" style="text-decoration: none; color: inherit;">
+                    <div class="summary-box">
+                        <span><?php echo $order_count; ?></span>
+                    </div>
+                    <h6>ออเดอร์</h6>
+                </a>
             </div>
             <div class="col-4 d-flex flex-column align-items-center">
-                <div class="summary-box">
-                    <span><?php echo $preparing_count; ?></span>
-                </div>
-                <h6>ที่ต้องจัดเตรียม</h6>
+                <a href="shop_order.php?status_order=prepare" style="text-decoration: none; color: inherit;">
+                    <div class="summary-box">
+                        <span><?php echo $preparing_count; ?></span>
+                    </div>
+                    <h6>ที่ต้องจัดเตรียม</h6>
+                </a>
             </div>
             <div class="col-4 d-flex flex-column align-items-center">
-                <div class="summary-box">
-                    <span><?php echo $completed_count; ?></span>
-                </div>
-                <h6>เสร็จสิ้นแล้ว</h6>
+                <a href="shop_order.php?status_order=complete" style="text-decoration: none; color: inherit;">
+                    <div class="summary-box">
+                        <span><?php echo $completed_count; ?></span>
+                    </div>
+                    <h6>เสร็จสิ้นแล้ว</h6>
+                </a>
             </div>
         </div>
+
         <hr>
 
         <div class="row align-items-center">
@@ -300,32 +334,30 @@ $sales_data = [40, 55, 65, 75, 90];
         <br>
         <div class="total-sell">
             <p>ยอดขาย (฿) </p>
-            <p><?php echo number_format($total_sales); ?></p>
+            <p><?php echo number_format($total_sales, 2); ?></p>
         </div>
+
         <div class="row mt-3">
             <canvas id="salesChart"></canvas>
         </div>
     </div>
 
-
-
     <footer class="footer">
-        <div class="footer-item active">
+        <div class="footer-item active" onclick="window.location.href='shop_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
-        <div class="footer-item ">
+        <div class="footer-item" onclick="window.location.href='shop_order.php'">
             <i class="fa-solid fa-file-alt"></i>
         </div>
-        <div class="footer-item ">
+        <div class="footer-item " onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
         </div>
-        <div class="footer-item ">
+        <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
         </div>
     </footer>
 
-    <!-- Script แสดงกราฟ Chart.js -->
     <script>
     var ctx = document.getElementById('salesChart').getContext('2d');
     var salesChart = new Chart(ctx, {

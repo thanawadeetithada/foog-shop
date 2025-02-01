@@ -1,30 +1,3 @@
-<?php
-session_start();
-include 'db.php';
-
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
-    header('Location: index.php'); 
-    exit();
-}
-
-if (!isset($_GET['store_id'])) {
-    header('Location: index.php');
-    exit();
-}
-
-$store_id = $_GET['store_id']; 
-
-$sql = "SELECT product_id, product_name, price, image_url, is_show FROM products WHERE store_id = ? AND is_show = 1";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $store_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$products = []; 
-while ($row = $result->fetch_assoc()) {
-    $products[] = $row;
-}
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -43,7 +16,6 @@ while ($row = $result->fetch_assoc()) {
         margin: 0;
         padding: 0;
         background-color: #fff;
-        height: 100vh;
     }
 
     .top-tab {
@@ -119,7 +91,7 @@ while ($row = $result->fetch_assoc()) {
         background-color: red;
         border-radius: 50%;
     }
-
+  
     .search-form {
         width: 100%;
         max-width: 500px;
@@ -153,59 +125,26 @@ while ($row = $result->fetch_assoc()) {
         color: #555;
     }
 
-    .recommended {
-        margin: 20px;
+    .fa-circle-user {
+        font-size: 1.8rem;
+        color: #ffffff;
+        background-color: #ccc;
+        border-radius: 15px;
+    } 
+
+    .fa-arrow-left {
+        margin: 0 20px 0 10px;
+        cursor: pointer;
     }
 
-    .recommended h3 {
-        margin-bottom: 10px;
-        margin-top: 15px;
-        font-size: 18px;
-        color: #333;
-    }
-
-    .recommended .shops {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        justify-content: center;
-    }
-
-    .shop {
-        text-align: center;
-        background: #f9f9f9;
-        padding: 10px;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        max-width: 100%;
-    }
-
-    .shop img {
-        width: 100%;
-        max-width: 250px;
-        height: 100%;
-        max-height: 100px;
-        border-radius: 10px;
-    }
-
-    .menu-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-left: 5px;
-        margin-right: 5px;
-    }
-
-    .price {
-        margin-left: auto;
-        color: #333;
-        font-weight: bold;
-    }
+     /* end footer */
     </style>
 </head>
 
 <body>
     <div class="top-tab">
+    <div class="top-tab">
+    <i class="fa-solid fa-arrow-left" onclick="window.history.back();"></i>
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"
@@ -213,60 +152,9 @@ while ($row = $result->fetch_assoc()) {
                 <button type="submit"><i class="fas fa-search"></i></button>
             </div>
         </form>
-    </div>
-
-    <div class="recommended">
-        <h3>เมนูยอดนิยม</h3>
-        <div class="shops">
-            <?php
-        if (!empty($products)) {
-            foreach ($products as $row) {
-                $image_url = htmlspecialchars($row['image_url']);
-                $product_name = htmlspecialchars($row['product_name']);
-                $price = number_format($row['price'], 2);
-
-                echo '<a href="user_menu.php?product_id=' . $row['product_id'] . '" style="text-decoration: none; color: inherit;">
-    <div class="shop">
-        <img src="' . $image_url . '" alt="' . $product_name . '">
-        <div class="menu-item">
-            <span>' . $product_name . '</span>
-            <p>' . $price . '฿</p>
-        </div>
-    </div>
-</a>'; 
-            }
-        } else {
-            echo "<p>ไม่มีสินค้าในร้าน</p>";
-        }
-        ?>
-        </div>
-    </div>
-
-    <div class="recommended">
-        <h3>เมนูแนะนำ</h3>
-        <div class="shops">
-            <?php
-        if (!empty($products)) {
-            foreach ($products as $row) {
-                $image_url = htmlspecialchars($row['image_url']);
-                $product_name = htmlspecialchars($row['product_name']);
-                $price = number_format($row['price'], 2);
-
-                echo '<a href="user_menu.php?product_id=' . $row['product_id'] . '" style="text-decoration: none; color: inherit;">
-                <div class="shop">
-                    <img src="' . $image_url . '" alt="' . $product_name . '">
-                    <div class="menu-item">
-                        <span>' . $product_name . '</span>
-                        <p>' . $price . '฿</p>
-                    </div>
-                </div>
-            </a>';
-            }
-        } else {
-            echo "<p>ไม่มีสินค้าในร้าน</p>";
-        }
-        ?>
-        </div>
+        <a href="logout.php">
+            <i class="fa-solid fa-circle-user"></i>
+        </a>
     </div>
 
     <footer class="footer">

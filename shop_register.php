@@ -18,7 +18,7 @@ $title_text = ($role === 'admin') ? "เพิ่มร้านค้า" : "�
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $store_name = trim($_POST['store_name']);
-    $owner_name = trim($_POST['owner_name']);
+    $user_name = trim($_POST['user_name']);
     $phone = trim($_POST['phone']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $category = $_POST['category'];
@@ -74,14 +74,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->bind_param("ss", $phone, $password);
     if ($stmt->execute()) {
-        $owner_id = $conn->insert_id;
+        $user_id = $conn->insert_id;
 
         // เพิ่มข้อมูลร้านค้าในตาราง stores
-        $stmt = $conn->prepare("INSERT INTO stores (store_name, owner_id, owner_name, category, phone, image_url) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO stores (store_name, user_id, user_name, category, phone, image_url) VALUES (?, ?, ?, ?, ?, ?)");
         if (!$stmt) {
             die("Query failed: " . $conn->error);
         }
-        $stmt->bind_param("sissss", $store_name, $owner_id, $owner_name, $category, $phone, $image_url);
+        $stmt->bind_param("sissss", $store_name, $user_id, $user_name, $category, $phone, $image_url);
         if ($stmt->execute()) {
             echo "<script>alert('ลงทะเบียนร้านค้าเรียบร้อย!'); window.location.href = 'index.php';</script>";
             exit();
@@ -103,20 +103,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title><?php echo $title_text; ?></title>
     <style>
     * {
-        margin: 0;
-        padding: 0;
         box-sizing: border-box;
-        color: black;
-        text-decoration: none;
     }
 
     body {
-        font-family: 'Sarabun', sans-serif !important;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-color: #fff;
     }
 
     .login-container {
@@ -142,12 +139,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         top: 0;
         left: 0;
         z-index: 1000;
-    }
-
-    h2 {
-        color: #000;
-        font-size: 2rem;
-        margin-bottom: 1rem;
     }
 
     form button {
@@ -251,7 +242,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="login-container">
             <form method="POST" action="" enctype="multipart/form-data" id="storeForm">
                 <input type="text" name="store_name" placeholder="ชื่อร้าน" required>
-                <input type="text" name="owner_name" placeholder="ชื่อเจ้าของร้าน" required>
+                <input type="text" name="user_name" placeholder="ชื่อเจ้าของร้าน" required>
                 <input type="tel" name="phone" placeholder="เบอร์โทร" required pattern="[0-9]{10}" maxlength="10"
                     oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.setCustomValidity('');"
                     oninvalid="this.setCustomValidity('กรุณาใส่เบอร์โทรให้ถูกต้อง (ตัวเลข 10 หลัก)');">

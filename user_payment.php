@@ -1,4 +1,10 @@
+<?php
+$cart_order_id = isset($_GET['cart_order_id']) ? intval($_GET['cart_order_id']) : 0;
 
+if ($cart_order_id == 0) {
+    die("เกิดข้อผิดพลาด: ไม่พบหมายเลขคำสั่งซื้อ");
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
 
@@ -78,7 +84,7 @@
 
 <body>
     <div class="top-tab">
-        <i class="fa-solid fa-arrow-left"></i>
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back();"></i>
     </div>
     <div class="container">
         <h3>ข้อมูลการชำระ</h3>
@@ -90,15 +96,15 @@
 
         <!-- ส่วนแสดง QR Code สำหรับการชำระเงิน -->
         <div class="payment-section">
-            <img src="จ่ายเงิน.jpg" alt="QR Code สำหรับการชำระเงิน"
+            <img src="img/QRCode.jpg" alt="QR Code สำหรับการชำระเงิน"
                 style="max-width: 300px; display: block; margin: 0 auto;">
         </div>
 
         <!-- ฟอร์มสำหรับอัปโหลดไฟล์ -->
-        <form action="payment_confirmation.php" method="post" enctype="multipart/form-data">
+        <form action="update_payment.php" method="POST" enctype="multipart/form-data">
             <label for="payment_proof">หากชำระเรียบร้อยแล้ว โปรดแนบหลักฐานการชำระเงิน</label>
             <input type="file" name="payment_proof" id="payment_proof" required>
-            <br>
+            <input type="hidden" name="cart_order_id" value="<?php echo htmlspecialchars($cart_order_id); ?>">
             <button type="submit">ยืนยันการชำระ</button>
         </form>
     </div>

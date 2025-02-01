@@ -1,8 +1,7 @@
 <?php
 session_start();
-require 'db.php'; // เชื่อมต่อฐานข้อมูล
+require 'db.php';
 
-// ตรวจสอบว่ามี `product_id` ที่ต้องการแก้ไขหรือไม่
 if (!isset($_GET['product_id'])) {
     die("ไม่พบสินค้าที่ต้องการแก้ไข");
 }
@@ -10,7 +9,7 @@ if (!isset($_GET['product_id'])) {
 $product_id = $_GET['product_id'];
 $user_id = $_SESSION['user_id'] ?? null;
 
-// ดึงข้อมูลสินค้าจากฐานข้อมูล
+
 $stmt = $conn->prepare("SELECT * FROM products WHERE product_id = ?");
 $stmt->bind_param("i", $product_id);
 $stmt->execute();
@@ -18,24 +17,21 @@ $result = $stmt->get_result();
 $product = $result->fetch_assoc();
 $stmt->close();
 
-// ตรวจสอบว่าสินค้านี้เป็นของร้านค้าของเจ้าของบัญชีที่ล็อกอินหรือไม่
 if (!$product) {
     die("ไม่พบสินค้านี้ในฐานข้อมูล");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // รับค่าจากฟอร์ม
     $product_name = $_POST['product_name'];
     $price = $_POST['price'];
     $notes = $_POST['notes'] ?? '';
 
-    // แปลงตัวเลือกเพิ่มเติมและค่าใช้จ่ายเป็น JSON
     $options = isset($_POST['option']) ? json_encode($_POST['option']) : json_encode([]);
     $extra_costs = isset($_POST['extra_cost']) ? json_encode($_POST['extra_cost']) : json_encode([]);
 
-    // จัดการอัปโหลดรูปภาพใหม่ (ถ้ามี)
+
     $target_dir = "uploads/";
-    $image_url = $product['image_url']; // ใช้รูปเดิมถ้าไม่ได้อัปโหลดใหม่
+    $image_url = $product['image_url'];
 
     if (!empty($_FILES["product_image"]["name"])) {
         $image_file = $target_dir . basename($_FILES["product_image"]["name"]);
@@ -43,7 +39,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $image_url = $image_file;
     }
 
-    // อัปเดตข้อมูลสินค้าในฐานข้อมูล
     $stmt = $conn->prepare("UPDATE products SET product_name = ?, price = ?, options = ?, extra_cost = ?, image_url = ?, notes = ? WHERE product_id = ?");
     $stmt->bind_param("sdssssi", $product_name, $price, $options, $extra_costs, $image_url, $notes, $product_id);
 
@@ -70,7 +65,6 @@ $conn->close();
     <title>แก้ไขสินค้า</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-    
     * {
         margin: 0;
         padding: 0;
@@ -273,22 +267,22 @@ $conn->close();
 
 <body>
     <div class="login-wrapper">
-    <div class="header">แก้ไขสินค้า</div>
+        <div class="header">แก้ไขสินค้า</div>
         <div class="login-container">
-        <form action="edit_product_db.php" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
-  
-        <label>ชื่อสินค้า :</label>
-            <input type="text" name="product_name" value="<?php echo htmlspecialchars($product['product_name']); ?>"
-                required>
+            <form action="edit_product_db.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($product_id); ?>">
 
-            <label>ราคา (บาท) :</label>
-            <input type="number" step="0.01" name="price" value="<?php echo htmlspecialchars($product['price']); ?>"
-                required>
+                <label>ชื่อสินค้า :</label>
+                <input type="text" name="product_name" value="<?php echo htmlspecialchars($product['product_name']); ?>"
+                    required>
 
-            <label>ตัวเลือกเพิ่มเติม :</label>
-            <div id="option-container">
-                <?php 
+                <label>ราคา (บาท) :</label>
+                <input type="number" step="0.01" name="price" value="<?php echo htmlspecialchars($product['price']); ?>"
+                    required>
+
+                <label>ตัวเลือกเพิ่มเติม :</label>
+                <div id="option-container">
+                    <?php 
                 $options = json_decode($product['options'], true) ?? [];
                 $extra_costs = json_decode($product['extra_cost'], true) ?? [];
 
@@ -302,23 +296,20 @@ $conn->close();
                           </div>';
                 }
                 ?>
-            </div>
-            <button type="button" class="add-option" onclick="addOption()">+</button>
-            <br>
-            <label>รูปภาพสินค้า :</label>
-    
-            <input type="file" name="product_image">
-            <?php if ($product['image_url']) { ?>
-            <img src="<?php echo $product['image_url']; ?>" width="100">
-            <?php } ?>
-            <br>
-            <label>หมายเหตุ :</label>
-            <input type="text" name="notes" value="<?php echo htmlspecialchars($product['notes']); ?>">
+                </div>
+                <button type="button" class="add-option" onclick="addOption()">+</button>
+                <br>
+                <label>รูปภาพสินค้า :</label>
+                <input type="file" name="product_image" id="product_image">
+                <br><br>
+                <label>หมายเหตุ :</label>
+                <input type="text" name="notes" value="<?php echo htmlspecialchars($product['notes']); ?>">
 
-            <button type="submit">บันทึกการแก้ไข</button>
-            <button class="cancel" type="button" onclick="window.location.href='shop_all_product.php'">ยกเลิก</button>
-        </form>
-    </div>
+                <button type="submit">บันทึกการแก้ไข</button>
+                <button class="cancel" type="button"
+                    onclick="window.location.href='shop_all_product.php'">ยกเลิก</button>
+            </form>
+        </div>
     </div>
 
     <script>

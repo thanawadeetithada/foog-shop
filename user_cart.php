@@ -1,3 +1,46 @@
+<?php
+session_start();
+include 'db.php'; // นำเข้าไฟล์ db.php
+
+// ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่ (ต้องมี user_id)
+if (!isset($_SESSION['user_id'])) {
+    die("กรุณาเข้าสู่ระบบ");
+}
+
+$user_id = $_SESSION['user_id']; // ดึง user_id จาก session
+
+// ดึงข้อมูล order ล่าสุดของ user พร้อม product_name
+$sql = "SELECT o.cart_order_id, o.total_price, o.payment_method, 
+               oi.cart_order_item_id, oi.product_id, oi.quantity, oi.subtotal, oi.notes, 
+               p.product_name
+        FROM cart_orders o 
+        JOIN cart_order_items oi ON o.cart_order_id = oi.cart_order_id
+        JOIN products p ON oi.product_id = p.product_id
+        WHERE o.user_id = ? 
+        ORDER BY o.created_at DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$cart_orders = [];
+
+while ($row = $result->fetch_assoc()) {
+    $cart_orders[$row['cart_order_id']]['total_price'] = $row['total_price'];
+    $cart_orders[$row['cart_order_id']]['payment_method'] = $row['payment_method'];
+    $cart_orders[$row['cart_order_id']]['items'][] = [
+        'cart_order_item_id' => $row['cart_order_item_id'],
+        'product_id' => $row['product_id'],
+        'product_name' => $row['product_name'],
+        'quantity' => $row['quantity'],
+        'subtotal' => $row['subtotal'],
+        'notes' => $row['notes']
+    ];
+}
+
+$stmt->close();
+?>
 <!DOCTYPE html>
 <html lang="th">
 
@@ -27,7 +70,8 @@
         max-width: 400px;
         /* Remove full height for better layout with fixed footer */
         min-height: 100vh;
-        padding-bottom: 100px; /* Prevent content from overlapping the footer */
+        padding-bottom: 100px;
+        /* Prevent content from overlapping the footer */
     }
 
     .order-item {
@@ -99,7 +143,7 @@
     }
 
     .header {
-        margin-top: 3.5rem;
+        margin-top: 5rem;
         color: #333;
         padding: 10px;
         font-size: 1.5em;
@@ -121,7 +165,7 @@
         bottom: 0;
         width: 80%;
         background-color: #fff;
-        padding: 40px;
+        padding: 0 0 40px;
     }
 
     .reorder-button {
@@ -143,40 +187,122 @@
 
 <body>
     <div class="top-tab">
-    <i class="fa-solid fa-arrow-left"></i>
+        <i class="fa-solid fa-arrow-left" onclick="window.location.href='user_main.php';" style="cursor: pointer;"></i>
     </div>
 
     <div class="order-container">
         <div class="header">รายการที่สั่งอาหาร</div>
+
+        <?php if (!empty($cart_orders)) : ?>
+        <?php foreach ($cart_orders as $cart_order_id => $order) : ?>
+        <?php foreach ($order['items'] as $item) : ?>
         <div class="order-item">
             <div class="order-details">
-                <p class="food-name"><strong>ข้าวมันไก่ต้ม</strong></p>
-                <p class="note">หมายเหตุ :</p>
+                <p class="food-name"><strong><?php echo htmlspecialchars($item['product_name']); ?></strong></p>
+                <p class="note" title="<?php echo htmlspecialchars($item['notes']); ?>">
+                    หมายเหตุ :
+                    <?php echo (!empty($item['notes'])) 
+        ? htmlspecialchars(mb_strimwidth($item['notes'], 0, 15, "...")) 
+        : "-"; ?>
+                </p>
             </div>
 
             <div class="order-actions">
                 <div class="quantity">
-                    <button class="qty-btn">-</button>
-                    <span class="qty-value">1</span>
-                    <button class="qty-btn">+</button>
+                    <button class="qty-btn decrease"
+                        data-order-item-id="<?php echo $item['cart_order_item_id']; ?>">-</button>
+                    <span class="qty-value"
+                        id="qty-<?php echo $item['cart_order_item_id']; ?>"><?php echo $item['quantity']; ?></span>
+                    <button class="qty-btn increase"
+                        data-order-item-id="<?php echo $item['cart_order_item_id']; ?>">+</button>
                 </div>
-                <p class="price">50.-</p>
-                <i class="fa-solid fa-trash delete-icon"></i>
+                <p class="price" id="subtotal-<?php echo $item['cart_order_item_id']; ?>">
+                    <?php echo number_format($item['subtotal'], 2); ?>.-</p>
+                <i class="fa-solid fa-trash delete-icon"
+                    data-order-item-id="<?php echo htmlspecialchars($item['cart_order_item_id']); ?>"></i>
             </div>
         </div>
+        <?php endforeach; ?>
+
+        <div class="details-bottom">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin-bottom: 0px;"><strong>ชำระเงินโดย</strong></h2>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <p><?php echo $order['payment_method']; ?></p>
+            </div>
+            <hr>
+            <br>
+            <a href="user_payment.php?cart_order_id=<?php echo $cart_order_id; ?>&total_price=<?php echo number_format($order['total_price'], 2, '.', ''); ?>"
+                class="reorder-button">
+                ยืนยันคำสั่งซื้อ <?php echo number_format($order['total_price'], 2); ?>.-
+            </a>
+        </div>
+        <?php endforeach; ?>
+        <?php else : ?>
+        <p style="text-align: center;">ไม่มีรายการอาหารที่สั่ง</p>
+        <?php endif; ?>
     </div>
 
-    <div class="details-bottom">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin-bottom: 0px;"><strong>ชำระเงินโดย</strong></h2>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <p>QR Promptpay</p>
-        </div>
-        <hr>
-        <br>
-        <a href="#" class="reorder-button">ยืนยันคำสั่งซื้อ 50.-</a>
-    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".delete-icon").forEach(icon => {
+            icon.addEventListener("click", function() {
+                let orderItemId = this.getAttribute("data-order-item-id");
+
+                if (confirm("คุณต้องการลบรายการนี้หรือไม่?")) {
+                    fetch("delete_order_item_db.php", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: "cart_order_item_id=" + encodeURIComponent(orderItemId)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("ลบข้อมูลสำเร็จ");
+                                location.reload();
+                            } else {
+                                alert("เกิดข้อผิดพลาด: " + data.message);
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                }
+            });
+        });
+
+        document.querySelectorAll(".qty-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                let orderItemId = this.getAttribute("data-order-item-id");
+                let action = this.classList.contains("increase") ? "increase" : "decrease";
+
+                fetch("update_quantity_db.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `cart_order_item_id=${encodeURIComponent(orderItemId)}&action=${encodeURIComponent(action)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Response from server:", data);
+                        if (data.success) {
+                            document.getElementById(`qty-${orderItemId}`).textContent = data
+                                .new_quantity;
+                            document.getElementById(`subtotal-${orderItemId}`).textContent =
+                                `${data.new_subtotal}.-`;
+                            document.querySelector(".reorder-button").textContent =
+                                `ยืนยันคำสั่งซื้อ ${parseFloat(data.new_total_price).toFixed(2)}.-`;
+                        } else {
+                            alert("เกิดข้อผิดพลาด: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        });
+    });
+    </script>
 
 </body>
 

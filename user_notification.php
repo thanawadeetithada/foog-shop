@@ -1,4 +1,28 @@
+<?php
+session_start();
+include 'db.php';
 
+if (!isset($_SESSION['user_id'])) {
+    die("กรุณาเข้าสู่ระบบก่อน");
+}
+
+$user_id = $_SESSION['user_id']; 
+
+$sql = "
+    SELECT o.cart_order_id, o.status_order, MIN(s.store_name) AS store_name
+    FROM cart_orders o
+    JOIN cart_order_items oi ON o.cart_order_id = oi.cart_order_id
+    JOIN products p ON oi.product_id = p.product_id
+    JOIN stores s ON p.store_id = s.store_id
+    WHERE o.user_id = ?
+    GROUP BY o.cart_order_id, o.status_order
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,7 +70,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 1rem 1rem;
-       
+
     }
 
     .icon {
@@ -111,7 +135,7 @@
 
     .top-tab {
         width: 100%;
-        padding: 30px;
+        padding: 20px;
         background-color: #FDDF59;
         position: fixed;
         top: 0;
@@ -127,7 +151,7 @@
     }
 
     /* Footer Section */
-  .footer {
+    .footer {
         align-items: center;
         display: flex;
         justify-content: space-around;
@@ -164,7 +188,7 @@
         padding: 10px 20px;
         color: #fff;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-       
+
     }
 
     .notification-badge {
@@ -206,64 +230,66 @@
 </head>
 
 <body>
-    <div class="top-tab"></div>
+    <div class="top-tab">
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back();"></i>
+    </div>
 
     <div class="container">
-    <div class="header">แจ้งเตือน</div>
+        <div class="header">แจ้งเตือน</div>
         <main>
-           
+            <?php 
+$shown_cart_orders = []; 
+while ($row = $result->fetch_assoc()) { 
+    if (!in_array($row['cart_order_id'], $shown_cart_orders)) { 
+        $shown_cart_orders[] = $row['cart_order_id']; 
+?>
             <div class="status-item">
                 <div class="icon">
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div class="details">
-                    <span class="order"><strong>Order : 003</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านข้าวมันไก่</strong></span>
+                    <span class="order">
+                        <strong>Order : <?php echo $row['cart_order_id']; ?></strong>
+                    </span>&nbsp;
+                    <span class="order">
+                        <strong><?php echo htmlspecialchars($row['store_name']); ?></strong>
+                    </span>
                     <br>
-                    <span class="status">เสร็จสิ้นแล้ว</span>
-                </div>              
+                    <span class="status">
+                        <?php echo ($row['status_order'] !== null) ? "เสร็จสิ้นแล้ว" : "ร้านยังไม่ได้รับออเดอร์"; ?>
+                    </span>
+                </div>
             </div>
             <hr>
-            <div class="status-item">
-                <div class="icon">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div class="details">
-                    <span class="order"><strong>Order : 002</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านลูกชิ้นทอด</strong></span>
-                    <br>
-                    <span class="status">เสร็จสิ้นแล้ว</span>
-                </div>              
-            </div>
-            <hr>
-            <div class="status-item">
-                <div class="icon">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div class="details">
-                    <span class="order"><strong>Order : 001</strong></span>&nbsp;
-                    <span class="order"><strong>ร้านข้าวมันไก่</strong></span>
-                    <br>
-                    <span class="status">เสร็จสิ้นแล้ว</span>
-                </div>              
-            </div>
+            <?php 
+    } 
+} 
+?>
+
         </main>
     </div>
+
     <footer class="footer">
-            <div class="footer-item">
-                <i class="fa-solid fa-house-chimney"></i>&nbsp;
-                <p>HOME</p>
-            </div>
-            <div class="footer-item ">
-                <i class="fa-solid fa-file-alt"></i>
-            </div>
-            <div class="footer-item ">
-                <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-            <div class="footer-item active">
-                <i class="fa-solid fa-bell"></i>
-            </div>
-        </footer>
+        <div class="footer-item" onclick="window.location.href='user_main.php'">
+            <i class="fa-solid fa-house-chimney"></i>&nbsp;
+            <p>HOME</p>
+        </div>
+        <div class="footer-item" onclick="window.location.href='user_order.php'">
+            <i class="fa-solid fa-file-alt"></i>
+        </div>
+        <div class="footer-item" onclick="window.location.href='user_cart.php'">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div class="footer-item notification active" onclick="window.location.href='user_notification.php'">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
+        </div>
+    </footer>
+
 </body>
 
 </html>
+
+<?php
+$conn->close();
+?>

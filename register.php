@@ -7,20 +7,19 @@
     <title>ลงทะเบียน</title>
     <style>
     * {
-        margin: 0;
-        padding: 0;
         box-sizing: border-box;
-        color: black;
         text-decoration: none;
+        color: black;
     }
 
     body {
-        font-family: 'Sarabun', sans-serif !important;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-color: #fff;
     }
 
     .login-container {
@@ -46,12 +45,6 @@
         top: 0;
         left: 0;
         z-index: 1000;
-    }
-
-    h2 {
-        color: #000;
-        font-size: 2rem;
-        margin-bottom: 1rem;
     }
 
     form button {

@@ -39,12 +39,6 @@
         box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
     }
 
-    .login-wrapper h2 {
-        font-size: 2rem;
-        color: black;
-        text-align: center;
-    }
-
     form input[type="text"],
     form input[type="password"] {
         width: 100%;
@@ -87,35 +81,6 @@
         margin-top: 0.8rem;
     }
 
-    .forgot-password {
-        text-align: right;
-        margin: 5px 0;
-    }
-
-    .forgot-password a {
-        color: #000;
-        text-decoration: none;
-    }
-
-    .forgot-password a:hover {
-        text-decoration: underline;
-    }
-
-    .register-link a {
-        color: #fff;
-        text-decoration: none;
-    }
-
-    .register-link a:hover {
-        text-decoration: underline;
-    }
-
-    p {
-        margin-top: 15px;
-        font-size: 0.9rem;
-        color: #000;
-    }
-
     .login-title {
         color: #000;
         font-size: 2rem;
@@ -131,6 +96,12 @@
         align-items: center;
         margin-top: 13rem;
         height: 100vh;
+    }
+
+    .login-wrapper h2 {
+        font-size: 2rem;
+        color: black;
+        text-align: center;
     }
 
     .top-tab {

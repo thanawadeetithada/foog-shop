@@ -1,63 +1,71 @@
 <?php
 session_start();
-require 'db.php'; // เชื่อมต่อฐานข้อมูล
+include 'db.php';
 
-// ตรวจสอบว่าผู้ใช้ล็อกอินหรือไม่
+// ตรวจสอบว่า user_id ใน session มีหรือไม่
 if (!isset($_SESSION['user_id'])) {
-    die("กรุณาเข้าสู่ระบบก่อนเพิ่มสินค้า");
+    die("กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อ");
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = intval($_SESSION['user_id']);
 
-// ดึง store_id ของเจ้าของร้าน
-$query = $conn->prepare("SELECT store_id FROM stores WHERE owner_id = ?");
-$query->bind_param("i", $user_id);
-$query->execute();
-$query->bind_result($store_id);
-$query->fetch();
-$query->close();
+// ดึง store_id ของผู้ใช้ที่ล็อกอิน
+$sql = "SELECT s.store_id 
+        FROM users u 
+        JOIN stores s ON u.user_id = s.user_id
+        WHERE u.user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$stmt->bind_result($store_id);
+$stmt->fetch();
+$stmt->close();
 
 if (!$store_id) {
-    die("ไม่พบร้านค้าที่เกี่ยวข้องกับบัญชีนี้");
+    die("ไม่พบ store_id สำหรับผู้ใช้");
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // รับค่าจากฟอร์ม
-    $product_name = $_POST['product_name'];
-    $price = $_POST['price'];
-    $notes = $_POST['notes'] ?? '';
+// รับค่าจากฟอร์ม
+$product_name = isset($_POST['product_name']) ? trim($_POST['product_name']) : null;
+$price = isset($_POST['price']) ? floatval($_POST['price']) : 0.00;
+$options = isset($_POST['option']) ? json_encode($_POST['option']) : null; // แปลง array เป็น JSON
+$extra_cost = isset($_POST['extra_cost']) ? json_encode($_POST['extra_cost']) : null; // แปลง array เป็น JSON
+$notes = isset($_POST['notes']) ? trim($_POST['notes']) : null;
 
-    // แปลงตัวเลือกเพิ่มเติมและค่าใช้จ่ายเป็น JSON
-    $options = isset($_POST['option']) ? json_encode($_POST['option']) : json_encode([]);
-    $extra_costs = isset($_POST['extra_cost']) ? json_encode($_POST['extra_cost']) : json_encode([]);
+// ตรวจสอบค่าที่รับมาว่าไม่ว่าง
+if (empty($product_name) || $price <= 0) {
+    die("กรุณากรอกข้อมูลสินค้าให้ครบถ้วน");
+}
 
-    // จัดการอัปโหลดรูปภาพ
+// ตรวจสอบว่ามีการอัปโหลดรูปภาพหรือไม่
+$image_url = null;
+if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] == 0) {
     $target_dir = "uploads/";
-    $image_url = NULL;
+    $image_name = time() . "_" . basename($_FILES["product_image"]["name"]);
+    $target_file = $target_dir . $image_name;
 
-    if (!empty($_FILES["product_image"]["name"])) {
-        $image_file = $target_dir . basename($_FILES["product_image"]["name"]);
-        move_uploaded_file($_FILES["product_image"]["tmp_name"], $image_file);
-        $image_url = $image_file;
+    // ตรวจสอบประเภทไฟล์ (JPEG, PNG เท่านั้น)
+    $file_type = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+    if (!in_array($file_type, ["jpg", "jpeg", "png"])) {
+        die("อัปโหลดเฉพาะไฟล์ JPG หรือ PNG เท่านั้น");
     }
 
-    // ค่าเริ่มต้นให้แสดงสินค้าคือ `1` (เปิดใช้งาน)
-    $is_show = 1;
-
-    // บันทึกข้อมูลลงฐานข้อมูล
-    $stmt = $conn->prepare("INSERT INTO products (store_id, product_name, price, options, extra_cost, image_url, notes, is_show) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("isdssssi", $store_id, $product_name, $price, $options, $extra_costs, $image_url, $notes, $is_show);
-
-    if ($stmt->execute()) {
-        echo "เพิ่มสินค้าสำเร็จ!";
-        header("Location: shop_all_product.php"); // กลับไปที่หน้าหลัก
-        exit();
+    if (move_uploaded_file($_FILES["product_image"]["tmp_name"], $target_file)) {
+        $image_url = $target_file;
     } else {
-        echo "เกิดข้อผิดพลาด: " . $stmt->error;
+        die("เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ");
     }
-
-    $stmt->close();
-    $conn->close();
 }
+
+// **เพิ่มสินค้าใหม่ลงในฐานข้อมูล**
+$sql = "INSERT INTO products (store_id, product_name, price, options, extra_cost, image_url, notes) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("isdssss", $store_id, $product_name, $price, $options, $extra_cost, $image_url, $notes);
+$stmt->execute();
+$stmt->close();
+
+// **Redirect กลับไปหน้ารายการสินค้า**
+header("Location: shop_all_product.php");
+exit();
 ?>

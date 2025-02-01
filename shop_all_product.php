@@ -259,7 +259,8 @@ $result = $stmt->get_result();
 
 <body>
     <div class="header">
-    <i class="fa-solid fa-arrow-left" onclick="window.history.back();" style="cursor: pointer;"></i>&nbsp;&nbsp;
+        <i class="fa-solid fa-arrow-left" onclick="window.location.href='shop_main.php';"
+            style="cursor: pointer;"></i>&nbsp;&nbsp;
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"
@@ -331,13 +332,13 @@ $result = $stmt->get_result();
                         },
                         body: `product_id=${productId}&is_show=${isShow}`
                     })
-                    .then(response => response.json()) 
+                    .then(response => response.json())
                     .then(data => {
                         console.log("Response:", data);
                         if (data.status !== "success") {
                             alert("อัปเดตล้มเหลว: " + data.message);
                             toggle.checked = !toggle
-                            .checked;
+                                .checked;
                         }
                     })
                     .catch(error => {

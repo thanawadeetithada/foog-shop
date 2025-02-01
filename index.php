@@ -7,19 +7,17 @@
     <title>เข้าสู่ระบบ</title>
     <style>
     * {
-        margin: 0;
-        padding: 0;
         box-sizing: border-box;
-        color: blue;
     }
 
     body {
-        font-family: 'Sarabun', sans-serif !important;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-color: #fff;
     }
 
     .login-container {
@@ -45,12 +43,6 @@
         top: 0;
         left: 0;
         z-index: 1000;
-    }
-
-    h2 {
-        color: #000;
-        font-size: 2rem;
-        margin-bottom: 1rem;
     }
 
     form button {
@@ -136,9 +128,10 @@
                 <button type="submit">เข้าสู่ระบบ</button>
             </form>
             <p>คุณมีแอคเคาท์แล้วหรือยัง? <br>
-            <br>
-            <a href="shop_register.php">ลงทะเบียนเป็นร้านค้า</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <a href="register.php">ลงทะเบียนเป็นลูกค้า</a></p>
+                <br>
+                <a href="shop_register.php">ลงทะเบียนเป็นร้านค้า</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="register.php">ลงทะเบียนเป็นลูกค้า</a>
+            </p>
         </div>
     </div>
 </body>

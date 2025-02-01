@@ -349,18 +349,19 @@
         </div>
     </div>
     <footer class="footer">
-    <div class="footer-item">
-                <i class="fa-solid fa-house-chimney"></i>&nbsp;
-                <p>HOME</p>
-            </div>
-            <div class="footer-item active">
-                <i class="fa-solid fa-file-alt"></i>
-            </div>
-            <div class="footer-item">
-                 <i class="fa-solid fa-bell"></i>
-            </div>
-            <div class="footer-item ">
+        <div class="footer-item " onclick="window.location.href='shop_main.php'">
+            <i class="fa-solid fa-house-chimney"></i>&nbsp;
+            <p>HOME</p>
+        </div>
+        <div class="footer-item active" onclick="window.location.href='shop_order.php'">
+            <i class="fa-solid fa-file-alt"></i>
+        </div>
+        <div class="footer-item " onclick="window.location.href='shop_notification.php'">
+            <i class="fa-solid fa-bell"></i>
+        </div>
+        <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
-            </div>
+        </div>
     </footer>
+
 </body>

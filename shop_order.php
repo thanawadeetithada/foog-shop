@@ -1,12 +1,35 @@
+<?php
+session_start(); // เริ่ม session
+include 'db.php'; // เชื่อมต่อฐานข้อมูล
 
+// ตรวจสอบว่ามี user_id ใน session หรือไม่
+if (!isset($_SESSION['user_id'])) {
+    die("คุณยังไม่ได้เข้าสู่ระบบ");
+}
+
+$user_id = $_SESSION['user_id'];
+
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'receive'; 
+
+// ดึงข้อมูลออเดอร์ โดยเช็คว่า store_id ตรงกับ user_id ที่ login
+$sql = "SELECT orders_status_id, store_id, total_price, status_order, created_at 
+        FROM orders_status 
+        WHERE store_id = ? AND status_order = ? 
+        ORDER BY created_at DESC";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("is", $user_id, $status_filter); // ใช้ parameter สำหรับ user_id และ status_filter
+$stmt->execute();
+$result = $stmt->get_result();
+?>
 <!DOCTYPE html>
 <html lang="th">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สถานะคำสั่งซื้อ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>แจ้งเตือน</title>
     <style>
     .circle span {
         font-size: 16px;
@@ -42,7 +65,7 @@
 
     .top-tab {
         width: 100%;
-        padding: 30px;
+        padding: 20px;
         background-color: #FDDF59;
         position: fixed;
         top: 0;
@@ -302,82 +325,111 @@
 
 <body>
     <div class="top-tab">
+    <i class="fa-solid fa-arrow-left" onclick="window.location.href='shop_main.php';"></i>
     </div>
     <div class="container">
-        <div class="order-content">
-            <div class="header">รายการคำสั่งซื้อ</div>
-
-            <div class="step">
-                <div class="circle">
-                    <span class="correct">ออเดอร์</span>
-                </div>
-                <div class="circle">
-                    <span>ที่ต้องจัดเตรียม</span>
-                </div>
-                <div class="circle">
-                    <span>เสร็จสิ้น</span>
-                </div>
+        <div class="header">รายการคำสั่งซื้อ</div>
+        <div class="step">
+            <div class="circle" onclick="filterOrders('receive')">
+                <span class="<?php echo ($status_filter == 'receive') ? 'correct' : ''; ?>">ออเดอร์</span>
             </div>
-
-            <main>
-                <div class="status-item">
-                    <div class="icon">
-                        <i class="fa-solid fa-utensils"></i>
-                    </div>
-                    <div class="details">
-                        <div class="row">
-                            <span class="column"><strong>22 ธ.ค. 67, 10:25</strong></span>
-                            <span class="column"><strong>Order : 003</strong></span>
-                            <span class="column"><strong>150฿</strong></span>
-                        </div>
-                        <p class="order"><i
-                                class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x2</span>
-                            <br>
-                            <strong style="margin-left: 20px;">ข้าวมันไก่ทอด</strong>&nbsp;<span>x1</span>
-                        </p>
-                        <p style="margin-bottom: 5px;margin-left:1rem"> หมายเหตุ : - </p>
-                        <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                        <p class="order-confirm">รับออเดอร์</p>
-                    </div>
-                </div>
-
-                <hr>
-                <div class="status-item">
-                    <div class="icon">
-                        <i class="fa-solid fa-utensils"></i>
-                    </div>
-                    <div class="details">
-                        <div class="row">
-                            <span class="column"><strong>16 ธ.ค. 67, 11:45</strong></span>
-                            <span class="column"><strong>Order : 001</strong></span>
-                            <span class="column"><strong>50฿</strong></span>
-                        </div>
-                        <p class="order"><i
-                                class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x1</span>
-                        </p>
-                        <p style="margin-bottom: 5px;margin-left:1rem"> หมายเหตุ : - </p>
-                        <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                        <p class="order-confirm">รับออเดอร์</p>
-                    </div>
-                </div>
-                <hr>
-            </main>
-
+            <div class="circle" onclick="filterOrders('prepare')">
+                <span class="<?php echo ($status_filter == 'prepare') ? 'correct' : ''; ?>">ที่ต้องจัดเตรียม</span>
+            </div>
+            <div class="circle" onclick="filterOrders('complete')">
+                <span class="<?php echo ($status_filter == 'complete') ? 'correct' : ''; ?>">เสร็จสิ้น</span>
+            </div>
         </div>
+
+        <main>
+            <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                // แปลง timestamp เป็นวันที่อ่านง่าย
+                $date = date("d M Y, H:i", strtotime($row["created_at"]));
+                $orderId = $row["orders_status_id"];
+                $totalPrice = number_format($row["total_price"], 2);
+                $statusOrder = $row["status_order"];
+
+                // ตรวจสอบสถานะออเดอร์
+                if ($statusOrder === "receive") {
+                    $statusText = '<p class="order">รับออเดอร์แล้ว</p>';
+                } elseif ($statusOrder === "prepare") {
+                    $statusText = '<p class="order-prepare">กำลังเตรียม</p>';
+                } elseif ($statusOrder === "complete") {
+                    $statusText = '<p class="order-confirm">เสร็จสิ้นแล้ว</p>';
+                } else {
+                    $statusText = '<p class="order" style="color: red;">ร้านยังไม่รับออเดอร์</p>';
+                }
+
+                // ดึงข้อมูลร้านค้าของออเดอร์นี้ (มีแค่ 1 ร้าน)
+                $items_sql = "SELECT s.store_name 
+                            FROM orders_status_items oi
+                            LEFT JOIN products p ON oi.product_id = p.product_id
+                            LEFT JOIN stores s ON p.store_id = s.store_id
+                            WHERE oi.orders_status_id = ? 
+                            LIMIT 1"; // ดึงมาเพียง 1 แถวเท่านั้น
+
+                $stmt = $conn->prepare($items_sql);
+                $stmt->bind_param("i", $orderId);
+                $stmt->execute();
+                $items_result = $stmt->get_result();
+                $storeData = $items_result->fetch_assoc();
+                $storeName = $storeData["store_name"] ?? "ไม่ทราบชื่อร้าน";
+                $stmt->close();
+
+                // ทำให้กดได้ทุกออเดอร์ โดยไม่มีเงื่อนไข status_order
+                $clickableClass = 'clickable';
+                $orderLink = "onclick=\"window.location.href='shop_order_status.php?orders_status_id={$orderId}';\"";
+
+                // แสดงผลข้อมูล
+                echo "
+                <div class='status-item {$clickableClass}' {$orderLink}>
+                    <div class='icon'>
+                        <i class='fa-solid fa-utensils'></i>
+                    </div>
+                    <div class='details'>
+                        <div class='row'>
+                            <span class='column'><strong>{$date}</strong></span>
+                            <span class='column'><strong>Order : {$orderId}</strong></span>
+                            <span class='column'><strong>{$totalPrice}฿</strong></span>
+                        </div>
+                        <p class='order'><i class='fa-solid fa-store'></i>&nbsp;<strong>{$storeName}</strong></p>
+                        {$statusText}
+                    </div>
+                </div>
+                <hr>";
+            }
+        } else {
+            echo '<p style="margin-top: 20px;">ไม่มีคำสั่งซื้อ</p>';
+        }
+
+        $conn->close();
+        ?>
+        </main>
     </div>
+
     <footer class="footer">
-        <div class="footer-item">
+        <div class="footer-item " onclick="window.location.href='shop_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
-        <div class="footer-item active">
+        <div class="footer-item active" onclick="window.location.href='shop_order.php'">
             <i class="fa-solid fa-file-alt"></i>
         </div>
-        <div class="footer-item">
+        <div class="footer-item " onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
         </div>
-        <div class="footer-item ">
+        <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
         </div>
     </footer>
+    <script>
+        function filterOrders(status) {
+            window.location.href = window.location.pathname + "?status=" + status;
+        }
+    </script>
+
 </body>
+
+</html>

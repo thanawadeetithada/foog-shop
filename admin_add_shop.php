@@ -6,8 +6,8 @@ if (!isset($_SESSION['user_id']) || (!in_array($_SESSION['role'], ['admin'])) ) 
     header('Location: index.php'); 
     exit();
 }
-// ดึงข้อมูลร้านค้าจากฐานข้อมูล
-$sql = "SELECT store_id, store_name, owner_name, category, phone, image_url FROM stores";
+
+$sql = "SELECT store_id, store_name, user_name, category, phone, image_url FROM stores";
 $result = $conn->query($sql);
 ?>
 
@@ -31,7 +31,7 @@ $result = $conn->query($sql);
         background-color: #fff;
     }
 
-    .header {
+    .top-tab {
         background-color: #FFDE59;
         padding: 10px;
         display: flex;
@@ -40,14 +40,14 @@ $result = $conn->query($sql);
         text-align: center;
     }
 
-    .header form {
-        margin: 0;
+    .top-tab form {
+        margin: 0 10px 0 0px;
         align-items: center;
         justify-content: center;
         width: 80%;
     }
 
-    .header input {
+    .top-tab input {
         border: none;
         padding: 10px;
         border-radius: 20px;
@@ -162,47 +162,6 @@ $result = $conn->query($sql);
         margin-top: 10px;
     }
 
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 40px;
-        height: 20px;
-    }
-
-    .toggle-switch input {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-        z-index: 2;
-        /* ✅ ให้ checkbox อยู่เหนือสุด */
-    }
-
-    .toggle-slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #ccc;
-        transition: 0.4s;
-        border-radius: 34px;
-    }
-
-    .toggle-slider:before {
-        position: absolute;
-        content: "";
-        height: 14px;
-        width: 14px;
-        left: 3px;
-        bottom: 3px;
-        background-color: white;
-        transition: 0.4s;
-        border-radius: 50%;
-    }
-
     input:checked+.toggle-slider {
         background-color: #4CAF50;
     }
@@ -250,12 +209,19 @@ $result = $conn->query($sql);
     .fa-arrow-left {
         margin-right: 20px;
     }
+
+    .fa-circle-user {
+        font-size: 1.8rem;
+        color: #ffffff;
+        background-color: #ccc;
+        border-radius: 15px;
+    }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <i class="fa-solid fa-arrow-left" onclick="window.history.back();" style="cursor: pointer;"></i>&nbsp;&nbsp;
+    <div class="top-tab">
+        <i class="fa-solid fa-arrow-left" onclick="window.history.back();" style="cursor: pointer;"></i>
         <form method="GET" action="search.php" class="search-form">
             <div class="search-box">
                 <input type="text" name="query" placeholder="ค้นหาสินค้า"
@@ -263,6 +229,9 @@ $result = $conn->query($sql);
                 <button type="submit"><i class="fas fa-search"></i></button>
             </div>
         </form>
+        <a href="logout.php">
+            <i class="fa-solid fa-circle-user"></i>
+        </a>
     </div>
 
     <div class="recommended">
@@ -282,14 +251,14 @@ $result = $conn->query($sql);
              
                 <div class="menu-item">
                     <div class="menu-item-btn">
-<a href="shop_main.php?store_id=<?php echo $store_id; ?>" class="shop-btn">แก้ไข</a>
-            <form method="POST" action="delete_shop_db.php" style="display:inline;">
-                <input type="hidden" name="store_id" value="' . $store_id . '">
-                <button type="submit" class="edit-shop-btn">ลบ</button>
-            </form>
-        </div>
-    </div>
-    </div>';
+                        <a href="shop_main.php?store_id=<?php echo $store_id; ?>" class="shop-btn">ดูร้านค้า</a>
+                        <form method="POST" action="delete_shop_db.php" style="display:inline;">
+                            <input type="hidden" name="store_id" value="' . $store_id . '">
+                            <button type="submit" class="edit-shop-btn">ลบ</button>
+                        </form>
+                    </div>
+                </div>
+            </div>';
     }
     } else {
     echo "<p>ไม่มีร้านค้า</p>";

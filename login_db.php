@@ -6,10 +6,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone'];
     $password = $_POST['password'];
 
-    // ดึงข้อมูลจากตาราง users และ stores โดยใช้ INNER JOIN
     $sql = "SELECT u.user_id, u.phone, u.password, u.role, s.store_id
             FROM users u
-            LEFT JOIN stores s ON u.user_id = s.owner_id
+            LEFT JOIN stores s ON u.user_id = s.user_id  
             WHERE u.phone = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $phone);
@@ -25,9 +24,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['phone'] = $user['phone'];
             $_SESSION['role'] = $user['role'];
 
-            // ถ้า role เป็น store_owner ก็เก็บ store_id
-            if ($user['role'] == 'store_owner') {
-                $_SESSION['store_id'] = $user['store_id']; // เก็บ store_id
+            // ถ้า role เป็น store_owner และมี store_id ให้เก็บ store_id ลง session
+            if ($user['role'] == 'store_owner' && !is_null($user['store_id'])) {
+                $_SESSION['store_id'] = $user['store_id']; 
+            } else {
+                $_SESSION['store_id'] = null; // ป้องกันข้อผิดพลาดในกรณีไม่มี store_id
             }
 
             // รีไดเร็กไปยังหน้าต่างๆ ตามบทบาท
