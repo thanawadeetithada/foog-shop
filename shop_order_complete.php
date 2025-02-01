@@ -1,3 +1,69 @@
+<?php
+session_start();
+include 'db.php'; // เชื่อมต่อฐานข้อมูล
+
+// สมมติว่าเราใช้ session เพื่อเก็บ user_id ของผู้ใช้ที่ล็อกอิน
+$user_id = $_SESSION['user_id']; // หรือค่าที่คุณเก็บไว้ใน session
+
+// ดึงคำสั่งซื้อล่าสุดของผู้ใช้จากฐานข้อมูล
+$sql = "
+    SELECT orders_status_id 
+    FROM orders_status 
+    WHERE user_id = $user_id 
+    ORDER BY created_at DESC 
+    LIMIT 1
+";
+$result = $conn->query($sql);
+
+// ตรวจสอบว่ามีคำสั่งซื้อหรือไม่
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $order_id = $row['orders_status_id']; // ดึงค่า order_id จากฐานข้อมูล
+} else {
+    echo "ไม่พบคำสั่งซื้อสำหรับผู้ใช้นี้"; 
+    exit; // หรือทำการจัดการเพิ่มเติมเมื่อไม่พบคำสั่งซื้อ
+}
+
+// ใช้ $order_id ในการดึงข้อมูลจากฐานข้อมูลอีกที
+$sql = "
+    SELECT 
+        os.created_at, 
+        os.orders_status_id, 
+        os.total_price, 
+        os.status_order, 
+        osu.phone, 
+        osi.notes, 
+        p.product_name, 
+        osi.quantity
+    FROM orders_status os
+    JOIN orders_status_items osi ON os.orders_status_id = osi.orders_status_id
+    JOIN products p ON osi.product_id = p.product_id
+    JOIN users osu ON os.user_id = osu.user_id
+    WHERE os.orders_status_id = $order_id
+";
+
+$result = $conn->query($sql);
+
+// ตรวจสอบว่าได้ข้อมูลหรือไม่
+if ($result->num_rows > 0) {
+    // ดึงข้อมูลจากฐานข้อมูลและแสดง
+    while ($row = $result->fetch_assoc()) {
+        $created_at = $row['created_at'];
+        $order_id = $row['orders_status_id'];
+        $total_price = number_format($row['total_price'], 2); // แปลงราคาให้เป็น 2 ตำแหน่ง
+        $status_order = $row['status_order'];
+        $phone = $row['phone'];
+        $notes = $row['notes'];
+        $product_name = $row['product_name'];
+        $quantity = $row['quantity'];
+    }
+} else {
+    echo "ไม่พบข้อมูลคำสั่งซื้อ";
+}
+
+$conn->close();
+
+?>
 
 <!DOCTYPE html>
 <html lang="th">
@@ -8,7 +74,8 @@
     <title>สถานะคำสั่งซื้อ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-    .circle span {
+        /* ใส่สไตล์ของคุณที่นี่ */
+        .circle span {
         font-size: 16px;
         color: #333;
         margin-top: 10px;
@@ -314,7 +381,7 @@
 
             <div class="step">
                 <div class="circle">
-                    <span >ออเดอร์</span>
+                    <span>ออเดอร์</span>
                 </div>
                 <div class="circle">
                     <span>ที่ต้องจัดเตรียม</span>
@@ -331,16 +398,14 @@
                     </div>
                     <div class="details">
                         <div class="row">
-                            <span class="column"><strong>16 ธ.ค. 67, 11:45</strong></span>
-                            <span class="column"><strong>Order : 001</strong></span>
-                            <span class="column"><strong>50฿</strong></span>
+                            <span class="column"><strong><?php echo date("d ม.ค. Y, H:i", strtotime($created_at)); ?></strong></span>
+                            <span class="column"><strong>Order : <?php echo $order_id; ?></strong></span>
+                            <span class="column"><strong><?php echo $total_price; ?>฿</strong></span>
                         </div>
-                        <p class="order"><i
-                                class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x1</span>
-                        </p>
-                        <p style="margin-bottom: 5px;margin-left:1rem"> หมายเหตุ : - </p>
-                        <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                        <p class="order-confirm">เสร็จสิ้นแล้ว</p>
+                        <p class="order"><i class="fa-solid fa-bag-shopping"></i>&nbsp;<strong><?php echo $product_name; ?></strong>&nbsp;<span>x<?php echo $quantity; ?></span></p>
+                        <p style="margin-bottom: 5px;margin-left:1rem"> หมายเหตุ : <?php echo $notes ? $notes : "-"; ?></p>
+                        <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong><?php echo $phone; ?></strong></p>
+                        <p class="order-confirm"><?php echo ucfirst($status_order); ?></p>
                     </div>
                 </div>
                 <hr>
@@ -363,5 +428,6 @@
             <i class="fa-regular fa-folder-open"></i>
         </div>
     </footer>
-
 </body>
+
+</html>
