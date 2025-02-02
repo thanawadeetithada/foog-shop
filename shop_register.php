@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category = $_POST['category'];
 
     // ตรวจสอบหมวดหมู่ว่ามีค่าถูกต้องหรือไม่
-    $allowed_categories = ['อาหาร', 'เครื่องดื่ม', 'ของหวาน', 'อื่นๆ'];
+    $allowed_categories = ['อาหาร', 'เครื่องดื่ม', 'ของทานเล่น', 'อื่นๆ'];
     if (!in_array($category, $allowed_categories)) {
         echo "<script>alert('หมวดหมู่ไม่ถูกต้อง'); window.history.back();</script>";
         exit();
@@ -251,7 +251,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <option value="" selected disabled>หมวดหมู่</option>
                     <option value="อาหาร">อาหาร</option>
                     <option value="เครื่องดื่ม">เครื่องดื่ม</option>
-                    <option value="ของหวาน">ของหวาน</option>
+                    <option value="ของทานเล่น">ของทานเล่น</option>
                     <option value="อื่นๆ">อื่นๆ</option>
                 </select>
                 <div class="import-img">

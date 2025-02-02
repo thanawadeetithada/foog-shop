@@ -19,19 +19,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $user = $result->fetch_assoc();
         
         if (password_verify($password, $user['password'])) {
-            // เก็บข้อมูลใน session
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['phone'] = $user['phone'];
             $_SESSION['role'] = $user['role'];
 
-            // ถ้า role เป็น store_owner และมี store_id ให้เก็บ store_id ลง session
             if ($user['role'] == 'store_owner' && !is_null($user['store_id'])) {
                 $_SESSION['store_id'] = $user['store_id']; 
             } else {
-                $_SESSION['store_id'] = null; // ป้องกันข้อผิดพลาดในกรณีไม่มี store_id
+                $_SESSION['store_id'] = null; 
             }
 
-            // รีไดเร็กไปยังหน้าต่างๆ ตามบทบาท
             if ($user['role'] == "customer") {
                 header("Location: user_main.php");
                 exit();

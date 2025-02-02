@@ -43,7 +43,13 @@ while ($row = $result->fetch_assoc()) {
         margin: 0;
         padding: 0;
         background-color: #fff;
-        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .main-content {
+        flex-grow: 1;
     }
 
     .top-tab {
@@ -70,7 +76,6 @@ while ($row = $result->fetch_assoc()) {
         font-size: 14px;
     }
 
-    /* Footer Section */
     .footer {
         align-items: center;
         display: flex;
@@ -78,12 +83,11 @@ while ($row = $result->fetch_assoc()) {
         background-color: #fff;
         padding: 5px 0;
         margin-left: 20px;
-        position: fixed;
         bottom: 0;
-        margin-bottom: 20px;
         width: 90%;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 100px;
+        margin-bottom: 1rem;
     }
 
     .footer-item {
@@ -118,6 +122,7 @@ while ($row = $result->fetch_assoc()) {
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .search-form {
@@ -241,7 +246,7 @@ while ($row = $result->fetch_assoc()) {
         ?>
         </div>
     </div>
-
+    <div class="main-content">
     <div class="recommended">
         <h3>เมนูแนะนำ</h3>
         <div class="shops">
@@ -268,23 +273,44 @@ while ($row = $result->fetch_assoc()) {
         ?>
         </div>
     </div>
+    </div>
 
     <footer class="footer">
-        <div class="footer-item active">
+        <div class="footer-item active" onclick="window.location.href='user_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
-        <div class="footer-item">
+        <div class="footer-item" onclick="window.location.href='user_order.php'">
             <i class="fa-solid fa-file-alt"></i>
         </div>
-        <div class="footer-item">
+        <div class="footer-item" onclick="window.location.href='user_cart.php'">
             <i class="fa-solid fa-cart-shopping"></i>
         </div>
-        <div class="footer-item notification">
+        <div class="footer-item notification" onclick="window.location.href='user_notification.php'">
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
     </footer>
+
+    <script>
+    function fetchNotifications() {
+        fetch('get_notifications_user.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
+
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+    </script>
+
 </body>
 
 </html>

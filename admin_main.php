@@ -150,6 +150,7 @@ $sales_data = [40, 55, 65, 75, 90];
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .footer div {
@@ -267,6 +268,7 @@ $sales_data = [40, 55, 65, 75, 90];
         </div>
         <div class="footer-item" onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
         </div>
         <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>

@@ -50,28 +50,28 @@ $stmt->close();
     <title>รายการอาหารที่สั่ง</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-    /* General Styles */
     body {
         font-family: Arial, sans-serif;
         background-color: white;
         margin: 0;
         padding: 0;
         display: flex;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: flex-start;
-        min-height: 100vh;
+        height: 100vh;
+        overflow: hidden;
     }
 
-    /* Container */
     .order-container {
         background: white;
         padding: 20px;
-        width: 80%;
+        width: 100%;
         max-width: 400px;
-        /* Remove full height for better layout with fixed footer */
-        min-height: 100vh;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
         padding-bottom: 100px;
-        /* Prevent content from overlapping the footer */
     }
 
     .order-item {
@@ -143,7 +143,7 @@ $stmt->close();
     }
 
     .header {
-        margin-top: 5rem;
+        margin-top: 4rem;
         color: #333;
         padding: 10px;
         font-size: 1.5em;
@@ -161,11 +161,11 @@ $stmt->close();
     }
 
     .details-bottom {
-        position: fixed;
-        bottom: 0;
-        width: 80%;
+        margin-top: auto;
+        width: 100%;
         background-color: #fff;
-        padding: 0 0 40px;
+        padding: 10px 0 40px;
+        text-align: center;
     }
 
     .reorder-button {

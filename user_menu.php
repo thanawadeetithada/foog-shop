@@ -208,7 +208,7 @@ $conn->close();
                 <span><strong>หมายเหตุถึงร้าน</strong></span>
                 <span>ไม่จำเป็นต้องระบุ</span>
             </div>
-            <textarea class="input-box" placeholder="ระบุรายละเอียดเพิ่มเติม"></textarea>
+            <textarea class="input-box" id="notes" placeholder="ระบุรายละเอียดเพิ่มเติม"></textarea>
         </div>
 
         <div class="btn-bottom">
@@ -257,7 +257,7 @@ $conn->close();
             if (selectedOption) {
                 optionsInput.value = selectedOption.value;
                 extraCost = parseFloat(selectedOption.getAttribute("data-extra-cost")) ||
-                0;
+                    0;
             } else {
                 optionsInput.value = "";
                 extraCost = 0;
@@ -283,6 +283,13 @@ $conn->close();
             option.addEventListener("change", function() {
                 updateOptions();
             });
+        });
+
+        const notesTextarea = document.getElementById("notes");
+        const notesInput = document.getElementById("notes_input");
+
+        notesTextarea.addEventListener("input", function() {
+            notesInput.value = notesTextarea.value;
         });
 
         updateDisplay();

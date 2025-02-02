@@ -58,6 +58,13 @@ if ($user_id > 0) {
     }
     $stmt->close();
 }
+
+if ($order_id != 0 && $status_order == 'complete') {
+    $sqlUpdate = "UPDATE orders_status SET notification = 0 WHERE orders_status_id = ?";
+    $stmtUpdate = $conn->prepare($sqlUpdate);
+    $stmtUpdate->bind_param("i", $order_id);
+    $stmtUpdate->execute();
+}
 ?>
 
 <!DOCTYPE html>
@@ -70,7 +77,11 @@ if ($user_id > 0) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
     * {
+        margin: 0;
         color: black;
+        padding: 0;
+        box-sizing: border-box;
+        text-decoration: none;
     }
 
     body {
@@ -78,29 +89,32 @@ if ($user_id > 0) {
         margin: 0;
         padding: 0;
         background-color: #f8f8f8;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        /* ให้สูงเต็มหน้าจอ */
     }
 
     .container {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        height: 100vh;
+        flex-grow: 1;
+        /* ให้ container ขยายเต็มหน้าจอ */
         background: #fff;
         border-radius: 10px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         overflow-y: auto;
-        padding: 0px 20px;
+        padding: 0px;
     }
 
     .details-bottom {
-        position: sticky;
-        bottom: 0;
         background-color: #fff;
-        padding: 20px;
+        padding: 20px 30px;
+        /* ไม่ใช้ position: sticky หรือ fixed */
     }
 
     .header {
-        margin-top: 5rem;
+        margin-top: 4rem;
         color: #333;
         padding: 10px;
         font-size: 1.5em;
@@ -227,6 +241,15 @@ if ($user_id > 0) {
         padding: 0;
         list-style-type: none;
     }
+
+    .order-content {
+        flex: 1;
+        /* ให้ content ขยายจนเต็มพื้นที่ */
+        padding: 20px;
+    }
+    .order-list {
+        margin-top: 10px;
+    }
     </style>
 </head>
 
@@ -281,7 +304,7 @@ if ($user_id > 0) {
                 </span>
                 <hr>
                 <ul>
-                    <span><strong>รายการคำสั่งซื้อ</strong></span>
+                    <span><strong class="order-list">รายการคำสั่งซื้อ</strong></span>
                     <?php foreach ($order_items as $item): ?>
                     <li style="display: flex; justify-content: space-between;margin-top: 20px;">
                         <span style="width: 50%;"><?= htmlspecialchars($item['product_name']); ?></span>
@@ -301,7 +324,7 @@ if ($user_id > 0) {
                     <strong><?= number_format($order["total_price"], 2); ?>฿</strong>
                 </h2>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:20px;margin-top:20px">
                 <p><strong>วิธีการชำระ</strong></p>
                 <p><?= $order["payment_method"]; ?></p>
             </div>

@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || (!in_array($_SESSION['role'], ['store_owner'
 
 $store_id = $_SESSION['store_id'];
 
-$sql = "SELECT product_id, product_name, price, image_url, is_show FROM products WHERE store_id = ? AND is_show = 1";
+$sql = "SELECT product_id, product_name, price, image_url, is_show FROM products WHERE store_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $store_id);
 $stmt->execute();
@@ -33,6 +33,15 @@ $result = $stmt->get_result();
         margin: 0;
         padding: 0;
         background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        /* ให้ body มีความสูงเต็มหน้าจอ */
+    }
+
+    .main-content {
+        flex-grow: 1;
+        /* ทำให้เนื้อหาหลักขยายเต็มที่เพื่อผลัก 'details-bottom' ไปล่างสุด */
     }
 
     .header {
@@ -137,7 +146,6 @@ $result = $stmt->get_result();
     }
 
     .details-bottom {
-        position: fixed;
         bottom: 0;
         left: 0;
         width: 90%;
@@ -256,7 +264,6 @@ $result = $stmt->get_result();
     }
     </style>
 </head>
-
 <body>
     <div class="header">
         <i class="fa-solid fa-arrow-left" onclick="window.location.href='shop_main.php';"
@@ -270,51 +277,53 @@ $result = $stmt->get_result();
         </form>
     </div>
 
-    <div class="recommended">
-        <h3>สินค้าทั้งหมด</h3>
-        <div class="shops">
-            <?php
-       if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $image_url = htmlspecialchars($row['image_url']); 
-            $product_name = htmlspecialchars($row['product_name']);
-            $price = number_format($row['price'], 2);
-            $product_id = htmlspecialchars($row['product_id']);
-            $is_checked = ($row['is_show'] == 1) ? 'checked' : '';
-    
-            echo '<div class="shop">
-                <img src="' . $image_url . '" alt="' . $product_name . '">
-                <div class="menu-item">
-                    <span>' . $product_name . '</span>
-                    <p>' . $price . '฿</p>
+    <div class="main-content">
+        <div class="recommended">
+            <h3>สินค้าทั้งหมด</h3>
+            <div class="shops">
+                <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        $image_url = htmlspecialchars($row['image_url']); 
+                        $product_name = htmlspecialchars($row['product_name']);
+                        $price = number_format($row['price'], 2);
+                        $product_id = htmlspecialchars($row['product_id']);
+                        $is_checked = ($row['is_show'] == 1) ? 'checked' : '';
+                
+                        echo '<div class="shop">
+                            <img src="' . $image_url . '" alt="' . $product_name . '">
+                            <div class="menu-item">
+                                <span>' . $product_name . '</span>
+                                <p>' . $price . '฿</p>
+                            </div>
+                          <div class="toggle-switch">
+                    <input type="checkbox" class="toggle-checkbox" data-product-id="' . $product_id . '" ' . $is_checked . '>
+                    <span class="toggle-slider"></span>
                 </div>
-              <div class="toggle-switch">
-    <input type="checkbox" class="toggle-checkbox" data-product-id="' . $product_id . '" ' . $is_checked . '>
-    <span class="toggle-slider"></span>
-</div>
-
-                <div class="menu-item">
-                    <div class="menu-item-btn">
-                        <a href="shop_edit_product.php?product_id=' . $product_id . '" class="shop-btn">แก้ไข</a>
-                        <form method="POST" action="delete_product_db.php" style="display:inline;">
-                            <input type="hidden" name="product_id" value="' . $product_id . '">
-                            <button type="submit" class="edit-shop-btn">ลบ</button>
-                        </form>
-                    </div>
-                </div>
-            </div>';
-        }
-    } else {
-        echo "<p>ไม่มีสินค้าในร้าน</p>";
-    }
     
-    ?>
+                            <div class="menu-item">
+                                <div class="menu-item-btn">
+                                    <a href="shop_edit_product.php?product_id=' . $product_id . '" class="shop-btn">แก้ไข</a>
+                                    <form method="POST" action="delete_product_db.php" style="display:inline;">
+                                        <input type="hidden" name="product_id" value="' . $product_id . '">
+                                        <button type="submit" class="edit-shop-btn">ลบ</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>';
+                    }
+                } else {
+                    echo "<p>ไม่มีสินค้าในร้าน</p>";
+                }
+                ?>
+            </div>
         </div>
     </div>
 
-    <footer class="details-bottom">
+    <div class="details-bottom">
         <a href="shop_add_product.php" class="reorder-button">เพิ่มสินค้าใหม่</a>
-    </footer>
+    </div>
+
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {

@@ -202,6 +202,7 @@
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .footer div {

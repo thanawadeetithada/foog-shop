@@ -54,11 +54,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $store_id = $order['store_id']; // ดึง store_id มาด้วย
 
                     // **เพิ่มข้อมูลลง `orders_status` พร้อม `store_id`**
-                    $sql = "INSERT INTO orders_status (user_id, store_id, total_price, extra_cost, options, payment_method, status, img_payment)
-                            VALUES (?, ?, ?, ?, ?, ?, 'Paid', ?)";
-                    $stmt_insert = $conn->prepare($sql);
-                    $stmt_insert->bind_param("iiddsss", $logged_in_user_id, $store_id, $total_price, $extra_cost, $options, $payment_method, $new_file_name);
-                    $stmt_insert->execute();
+                    $sql = "INSERT INTO orders_status (user_id, store_id, total_price, extra_cost, options, payment_method, status, img_payment, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, 'Paid', ?, DATE_ADD(NOW(), INTERVAL 15 HOUR))";
+$stmt_insert = $conn->prepare($sql);
+$stmt_insert->bind_param("iiddsss", $logged_in_user_id, $store_id, $total_price, $extra_cost, $options, $payment_method, $new_file_name);
+$stmt_insert->execute();
+
+            
                     $orders_status_id = $stmt_insert->insert_id; // ดึง orders_status_id ที่เพิ่งสร้างขึ้นมา
 
                     // **5️⃣ คัดลอกสินค้าไปยัง `orders_status_items`**

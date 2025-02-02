@@ -1,28 +1,28 @@
 <?php
 session_start();
-include 'db.php';
+include 'db.php'; 
 
-if (!isset($_SESSION['user_id'])) {
-    die("กรุณาเข้าสู่ระบบก่อน");
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+} else {
+    header("Location: index.php");
+    exit;
 }
 
-$user_id = $_SESSION['user_id']; 
-
-$sql = "
-    SELECT o.cart_order_id, o.status_order, MIN(s.store_name) AS store_name
-    FROM cart_orders o
-    JOIN cart_order_items oi ON o.cart_order_id = oi.cart_order_id
-    JOIN products p ON oi.product_id = p.product_id
-    JOIN stores s ON p.store_id = s.store_id
-    WHERE o.user_id = ?
-    GROUP BY o.cart_order_id, o.status_order
-";
+$sql = "SELECT os.orders_status_id, os.status, os.total_price, os.user_id, os.store_id, os.created_at, os.status_order, s.store_name
+        FROM orders_status os
+        LEFT JOIN stores s ON os.store_id = s.store_id
+        WHERE os.user_id = ? 
+        ORDER BY os.created_at DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,37 +33,45 @@ $result = $stmt->get_result();
 
     <title>แจ้งเตือน</title>
     <style>
-    /* General Reset */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+}
 
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #fff;
-    }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    height: 100vh; /* ใช้ความสูงเต็มหน้าจอ */
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
 
-    .container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-    }
+/* Container */
+.container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* ให้ container ขยายจนเต็มหน้าจอ */
+}
 
-    header {
-        padding: 1rem 1rem 0rem 1.8rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #000;
-        margin-top: 4rem;
-    }
+/* Header */
+header {
+    padding: 1rem 1rem 0rem 1.8rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #000;
+    margin-top: 4rem;
+}
 
-    main {
-        flex: 1;
-        overflow-y: auto;
-        padding: 0 1rem;
-    }
+/* Main Section */
+main {
+    flex: 1; /* ให้เนื้อหาหลักขยายเต็มพื้นที่ */
+    overflow-y: auto;
+    padding: 0 1rem;
+}
+
 
     .status-item {
         display: flex;
@@ -76,6 +84,7 @@ $result = $stmt->get_result();
     .icon {
         font-size: 1.8rem;
         margin-right: 0.5rem;
+        color: black;
     }
 
     .status-item .details {
@@ -94,8 +103,8 @@ $result = $stmt->get_result();
     }
 
     .details .status {
-        font-size: 1.2rem;
-        color: #4caf50;
+        font-size: 16px;
+        margin-right: 1rem;
     }
 
     .price {
@@ -109,11 +118,6 @@ $result = $stmt->get_result();
         height: 8px;
         background-color: red;
         border-radius: 50%;
-    }
-
-    footer {
-        background-color: #ffcc33;
-        padding: 0.5rem 0;
     }
 
     nav {
@@ -135,7 +139,7 @@ $result = $stmt->get_result();
 
     .top-tab {
         width: 100%;
-        padding: 20px;
+        padding: 30px;
         background-color: #FDDF59;
         position: fixed;
         top: 0;
@@ -150,21 +154,21 @@ $result = $stmt->get_result();
         font-size: 1.5em;
     }
 
+    .price {
+        color: orange;
+        font-size: 16px;
+    }
+
     /* Footer Section */
     .footer {
-        align-items: center;
-        display: flex;
-        justify-content: space-around;
-        background-color: #fff;
-        padding: 5px 0;
-        position: fixed;
-        bottom: 0;
-        margin-bottom: 20px;
-        width: 90%;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 100px;
-        margin-left: 20px;
-    }
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 5px 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 100px;
+    margin: 20px;
+}
 
     .footer-item {
         text-align: center;
@@ -199,6 +203,7 @@ $result = $stmt->get_result();
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .footer div {
@@ -221,56 +226,85 @@ $result = $stmt->get_result();
         cursor: pointer;
     }
 
-    .search-form {
-        width: 100%;
-        max-width: 500px;
-        position: relative;
+    .status-receive {
+        color: #4caf50;
+    }
+
+    .status-prepare {
+        color: orange;
+    }
+
+    .status-complete {
+        color: #4caf50;
+    }
+
+    .status-pending {
+        color: red;
     }
     </style>
 </head>
 
 <body>
-    <div class="top-tab">
-        <i class="fa-solid fa-arrow-left" onclick="window.history.back();"></i>
-    </div>
-
+    <div class="top-tab"></div>
     <div class="container">
         <div class="header">แจ้งเตือน</div>
+        <br>
         <main>
-            <?php 
-$shown_cart_orders = []; 
-while ($row = $result->fetch_assoc()) { 
-    if (!in_array($row['cart_order_id'], $shown_cart_orders)) { 
-        $shown_cart_orders[] = $row['cart_order_id']; 
-?>
-            <div class="status-item">
-                <div class="icon">
-                    <i class="fa-solid fa-utensils"></i>
-                </div>
-                <div class="details">
-                    <span class="order">
-                        <strong>Order : <?php echo $row['cart_order_id']; ?></strong>
-                    </span>&nbsp;
-                    <span class="order">
-                        <strong><?php echo htmlspecialchars($row['store_name']); ?></strong>
-                    </span>
-                    <br>
-                    <span class="status">
-                        <?php echo ($row['status_order'] !== null) ? "เสร็จสิ้นแล้ว" : "ร้านยังไม่ได้รับออเดอร์"; ?>
-                    </span>
-                </div>
-            </div>
-            <hr>
-            <?php 
-    } 
-} 
-?>
+            <?php
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $orderId = $row['orders_status_id'];
+                    $status = $row['status_order'];
+                    $totalPrice = $row['total_price'];
+                    $userId = $row['user_id'];
+                    $storeId = $row['store_id'];
+                    $storeName = $row['store_name']; 
 
+
+                    if ($status === 'receive') {
+                        $status_display = 'รับออเดอร์';
+                        $status_class = 'status-receive'; 
+                    } elseif ($status === 'prepare') {
+                        $status_display = 'กำลังเตรียม';
+                        $status_class = 'status-prepare';
+                    } elseif ($status === 'complete') {  
+                        $status_display = 'เสร็จสินแล้ว'; 
+                        $status_class = 'status-complete';
+                    } else {
+                        $status_display = 'รับออเดอร์';
+                        $status_class = 'status-receive';
+                    }
+
+                    echo "
+                    <a href='user_order_status.php?orders_status_id={$orderId}'>
+                        <div class='status-item'>
+                            <div class='icon'>
+                                <i class='fa-solid fa-utensils'></i>
+                            </div>
+                            <div class='details'>
+                                <span class='order'>
+                                      <strong>Order : {$orderId}</strong>
+                                </span>&nbsp;&nbsp;
+                                <span class='order'>
+                                    <strong>{$storeName}</strong>
+                                </span>
+                                <br>
+                                <span class='status {$status_class}'>{$status_display}</span>
+                            </div>              
+                        </div>
+                    </a>
+                    <hr>
+                    ";
+                }
+            } else {
+                echo "<p style='margin-left: 1rem;'>ไม่มีคำสั่งซื้อ</p>";
+            }
+            ?>
         </main>
     </div>
 
-    <footer class="footer">
-        <div class="footer-item" onclick="window.location.href='user_main.php'">
+    <div class="footer">
+        <div class="footer-item " onclick="window.location.href='user_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
@@ -280,16 +314,29 @@ while ($row = $result->fetch_assoc()) {
         <div class="footer-item" onclick="window.location.href='user_cart.php'">
             <i class="fa-solid fa-cart-shopping"></i>
         </div>
-        <div class="footer-item notification active" onclick="window.location.href='user_notification.php'">
+        <div class="footer-item active notification" onclick="window.location.href='user_notification.php'">
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
-    </footer>
+        </div>
+    <script>
+     function fetchNotifications() {
+        fetch('get_notifications_user.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
 
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+    </script>
 </body>
 
 </html>
-
-<?php
-$conn->close();
-?>

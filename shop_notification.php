@@ -1,30 +1,30 @@
 <?php
-session_start(); // เริ่ม session เพื่อเข้าถึงข้อมูล user_id
-
-// เชื่อมต่อกับฐานข้อมูล (แก้ไขตามการตั้งค่าของคุณ)
+session_start();
 include 'db.php'; 
 
-// ตรวจสอบว่ามี user_id ใน session หรือไม่
-if (!isset($_SESSION['user_id'])) {
-    die("คุณยังไม่ได้เข้าสู่ระบบ");
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $store_id = $_SESSION['store_id'];
+
+    echo "<script>console.log('User ID: " . $user_id . " and Store ID: " . $_SESSION['store_id'] . " logged in');</script>";
+} else {
+    header("Location: index.php");
+    exit;
 }
 
-$user_id = $_SESSION['user_id']; // ดึง user_id จาก session
-
-// ดึงข้อมูลคำสั่งซื้อจากฐานข้อมูลโดยใช้ JOIN กับ table users
-$sql = "
-    SELECT o.orders_status_id, o.status, o.total_price, u.phone 
-    FROM orders_status o
-    JOIN users u ON o.user_id = u.user_id  -- เปลี่ยนจาก store_id เป็น user_id
-    WHERE o.store_id = ?  -- ใช้ store_id เป็น filter ตาม user ที่เข้าสู่ระบบ
-"; 
+$sql = "SELECT orders_status_id, status, total_price, user_id, store_id, created_at 
+        FROM orders_status 
+        WHERE store_id = ? 
+        ORDER BY created_at DESC";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id); // ใช้ user_id เป็นพารามิเตอร์ใน query
+$stmt->bind_param("i", $store_id);  // "i" indicates that the parameter is an integer
 $stmt->execute();
-$result = $stmt->get_result(); // ดึงผลลัพธ์
+$result = $stmt->get_result();
 
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,7 +35,6 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
 
     <title>แจ้งเตือน</title>
     <style>
-    /* General Reset */
     * {
         margin: 0;
         padding: 0;
@@ -46,12 +45,18 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
     body {
         font-family: Arial, sans-serif;
         background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        /* ทำให้ body ครอบคลุมพื้นที่ทั้งหมด */
     }
+
 
     .container {
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        flex: 1;
+        /* ให้ container ขยายเต็มพื้นที่ที่เหลือ */
     }
 
     header {
@@ -63,7 +68,8 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
     }
 
     main {
-        flex: 1;
+        flex-grow: 1;
+        /* ทำให้ main content ขยายเต็มพื้นที่ที่เหลือ */
         overflow-y: auto;
         padding: 0 1rem;
     }
@@ -79,6 +85,7 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
     .icon {
         font-size: 1.8rem;
         margin-right: 0.5rem;
+        color: black;
     }
 
     .status-item .details {
@@ -116,10 +123,6 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
         border-radius: 50%;
     }
 
-    footer {
-        background-color: #ffcc33;
-        padding: 0.5rem 0;
-    }
 
     nav {
         display: flex;
@@ -160,20 +163,18 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
         font-size: 16px;
     }
 
-    /* Footer Section */
     .footer {
-        align-items: center;
         display: flex;
         justify-content: space-around;
+        align-items: center;
         background-color: #fff;
         padding: 5px 0;
-        position: fixed;
-        bottom: 0;
-        margin-bottom: 20px;
         width: 90%;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 100px;
-        margin-left: 20px;
+        margin: 20px;
+        margin-top: 20px;
+        /* ดัน footer ไปที่ด้านล่างสุด */
     }
 
     .footer-item {
@@ -192,13 +193,13 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
         margin: 5px 0 0;
     }
 
+
     .footer-item.active {
         background-color: #FFDE59;
         border-radius: 100px;
         padding: 10px 20px;
         color: #fff;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-
     }
 
     .notification-badge {
@@ -209,6 +210,7 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .footer div {
@@ -240,49 +242,58 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
         <br>
         <main>
             <?php
-    // ตรวจสอบว่า query คืนค่าผลลัพธ์หรือไม่
-    if ($result->num_rows > 0) {
-        // loop ผ่านทุกออเดอร์ที่ดึงมา
-        while ($row = $result->fetch_assoc()) {
-            $orderId = $row["orders_status_id"];
-            $status = $row["status"];
-            $totalPrice = number_format($row["total_price"], 2);
-            $phone = $row["phone"]; // ดึงข้อมูล phone จาก table users
-            
-            // ตรวจสอบสถานะคำสั่งซื้อ
-            if ($status == "Paid") {
-                $statusText = "ชำระแล้ว"; // ถ้าสถานะคือ "Paid" ให้แสดงว่า "ชำระแล้ว"
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $orderId = $row['orders_status_id'];
+                    $status = $row['status'];
+                    $totalPrice = $row['total_price'];
+                    $userId = $row['user_id'];
+                    $storeId = $row['store_id'];
+
+                    $sqlUser = "SELECT phone FROM users WHERE user_id = '$userId'";
+                    $resultUser = $conn->query($sqlUser);
+                    $phone = "ไม่ระบุ";
+                    if ($resultUser->num_rows > 0) {
+                        $rowUser = $resultUser->fetch_assoc();
+                        $phone = $rowUser['phone'];
+                    }
+
+                    if ($status == "Paid") {
+                        $statusText = "ชำระแล้ว";
+                    } else {
+                        $statusText = $status;
+                    }
+
+                    echo "
+                    <a href='shop_order_status.php?orders_status_id={$orderId}'>
+                        <div class='status-item'>
+                            <div class='icon'>
+                                <i class='fa-solid fa-utensils'></i>
+                            </div>
+                            <div class='details'>
+                                <span class='order'>
+                                    <i class='fa-solid fa-circle-user'></i>&nbsp;&nbsp;<strong>{$phone}</strong>
+                                </span>&nbsp;&nbsp;
+                                <span class='order'>
+                                    <strong>Order : {$orderId}</strong>
+                                </span>
+                                <br>
+                                &nbsp;&nbsp;<span class='status'>{$statusText}</span>
+                                <span class='price'>{$totalPrice}฿</span>
+                            </div>              
+                        </div>
+                    </a>
+                    <hr>
+                    ";
+                }
             } else {
-                $statusText = $status; // ถ้าสถานะไม่ใช่ "Paid" ก็แสดงค่า status ตรงๆ
+                echo "<p style='margin-left: 1rem;'>ไม่มีคำสั่งซื้อ</p>";
             }
-            
-            // แสดงข้อมูลใน HTML และทำให้สามารถคลิกเพื่อไปยังหน้ารายละเอียด
-            echo "
-            <a href='shop_order_status.php?orders_status_id={$orderId}'>
-                <div class='status-item'>
-                    <div class='icon'>
-                        <i class='fa-solid fa-utensils'></i>
-                    </div>
-                    <div class='details'>
-                        <span class='order'><i class='fa-solid fa-circle-user'></i>&nbsp;&nbsp;<strong>{$phone}</strong></span>&nbsp;&nbsp;
-                        <span class='order'><strong>Order : {$orderId}</strong></span>
-                        <br>
-                        &nbsp;&nbsp;<span class='status'>{$statusText}</span>
-                        <span class='price'>{$totalPrice}฿</span>
-                    </div>              
-                </div>
-            </a>
-            <hr>
-            ";
-        }
-    } else {
-        echo "<p>ไม่มีคำสั่งซื้อ</p>";
-    }
-    ?>
+            ?>
         </main>
     </div>
 
-    <footer class="footer">
+    <div class="footer">
         <div class="footer-item" onclick="window.location.href='shop_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
@@ -292,11 +303,31 @@ $result = $stmt->get_result(); // ดึงผลลัพธ์
         </div>
         <div class="footer-item active" onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
         </div>
         <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
         </div>
-    </footer>
+    </div>
+
+    <script>
+    function fetchNotifications() {
+        fetch('get_notifications_shop.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
+
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+    </script>
 </body>
 
 </html>

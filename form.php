@@ -90,6 +90,7 @@
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
   
     .search-form {

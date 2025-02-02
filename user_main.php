@@ -38,6 +38,13 @@ $result = $stmt->get_result();
         margin: 0;
         padding: 0;
         background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .main-content {
+        flex-grow: 1;
     }
 
     .top-tab {
@@ -167,12 +174,11 @@ $result = $stmt->get_result();
         background-color: #fff;
         padding: 5px 0;
         margin-left: 20px;
-        position: fixed;
         bottom: 0;
-        margin-bottom: 20px;
         width: 90%;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 100px;
+        margin-bottom: 1rem;
     }
 
     .footer-item {
@@ -207,6 +213,7 @@ $result = $stmt->get_result();
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .search-form {
@@ -288,11 +295,11 @@ $result = $stmt->get_result();
         </div>
     </nav>
 
-
-    <div class="recommended">
-        <h3>ร้านค้าทั้งหมด</h3>
-        <div class="shops">
-            <?php
+    <div class="main-content">
+        <div class="recommended">
+            <h3>ร้านค้าทั้งหมด</h3>
+            <div class="shops">
+                <?php
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $image_url = htmlspecialchars($row['image_url']); 
@@ -308,10 +315,11 @@ $result = $stmt->get_result();
             echo "<p>ไม่มีร้านค้า</p>";
         }
         ?>
+            </div>
         </div>
     </div>
 
-    <footer class="footer">
+    <div class="footer">
         <div class="footer-item active" onclick="window.location.href='user_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
@@ -326,8 +334,25 @@ $result = $stmt->get_result();
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
-    </footer>
+    </div>
+    <script>
+    function fetchNotifications() {
+        fetch('get_notifications_user.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
 
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+    </script>
 </body>
 
 </html>

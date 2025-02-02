@@ -1,49 +1,65 @@
 <?php
 include 'db.php'; 
-// รับค่า orders_status_id จาก URL
+
 $orders_status_id = isset($_GET['orders_status_id']) ? $_GET['orders_status_id'] : 0;
 
-// คำสั่ง SQL เพื่อดึงข้อมูลจากฐานข้อมูล โดยเชื่อมโยงตาราง orders_status, orders_status_items, products และ users
 $sql = "SELECT os.created_at, os.orders_status_id, os.status_order, os.payment_method, os.total_price, 
                osi.quantity, osi.notes AS item_notes, p.product_name, p.price, u.phone
         FROM orders_status os
         LEFT JOIN orders_status_items osi ON os.orders_status_id = osi.orders_status_id
         LEFT JOIN products p ON osi.product_id = p.product_id
-        LEFT JOIN users u ON os.user_id = u.user_id  -- เชื่อมโยงกับตาราง users
+        LEFT JOIN users u ON os.user_id = u.user_id
         WHERE os.orders_status_id = $orders_status_id";
 
 $result = $conn->query($sql);
 
-// ตรวจสอบว่ามีข้อมูลหรือไม่
 if ($result->num_rows > 0) {
-    // ดึงข้อมูลมาใช้งาน
     $row = $result->fetch_assoc();
 
-    // สร้างตัวแปรเพื่อเก็บข้อมูลที่ต้องการแสดง
-    $created_at = date("d M y, H:i", strtotime($row['created_at'])); // แปลงวันที่ให้เป็นรูปแบบที่ต้องการ
-    $order_id = str_pad($row['orders_status_id'], 3, "0", STR_PAD_LEFT); // ใช้คำสั่ง str_pad เพื่อแสดงเลขออเดอร์ 3 หลัก
+    $created_at = date("d M y, H:i", strtotime($row['created_at']));
+    $order_id = str_pad($row['orders_status_id'], 3, "0", STR_PAD_LEFT);
     $status_order = $row['status_order'];
     $payment_method = $row['payment_method'];
     $total_price = $row['total_price'];
-    $quantity = $row['quantity'];
-    $product_name = $row['product_name'];
-    $product_price = $row['price'];
-    $item_notes = $row['item_notes'];
-    $user_phone = $row['phone']; // ดึงเบอร์โทรศัพท์จากตาราง users
+    $user_phone = $row['phone'];
+    $items = []; // แทนที่จะแสดงแค่สินค้าเดียว, เก็บหลายๆ สินค้าใน array
+
+    do {
+        $product_name = $row['product_name'];
+        $product_price = $row['price'];
+        $quantity = $row['quantity'];
+        $item_notes = $row['item_notes'];
+        
+        // เก็บรายการสินค้าใน array
+        $items[] = [
+            'product_name' => $product_name,
+            'product_price' => $product_price,
+            'quantity' => $quantity,
+            'item_notes' => $item_notes
+        ];
+    } while ($row = $result->fetch_assoc()); // ใช้ while เพื่อดึงข้อมูลทุกแถวในผลลัพธ์
+
 } else {
     echo "ไม่พบข้อมูลคำสั่งซื้อ";
 }
 
 if (empty($status_order)) {
-    $status_message = "รับออเดอร์"; // หาก status_order เป็น NULL หรือค่าว่าง
+    $status_message = "รับออเดอร์";
 } elseif ($status_order == "receive") {
-    $status_message = "กำลังเตรียม"; // ถ้า status_order เป็น "receive"
+    $status_message = "กำลังเตรียม";
 } elseif ($status_order == "prepare") {
-    $status_message = "เสร็จสิ้น"; // ถ้า status_order เป็น "prepare"
+    $status_message = "เสร็จสิ้น";
 } elseif ($status_order == "complete") {
-    $status_message = "เรียบร้อย"; // ถ้า status_order เป็น "complete"
+    $status_message = "เรียบร้อย";
 } else {
-    $status_message = "สถานะไม่ทราบ"; // กรณีอื่นๆ ที่ไม่ตรงเงื่อนไขข้างต้น
+    $status_message = "สถานะไม่ทราบ"; 
+}
+
+if ($orders_status_id != 0 && $status_order != 'complete') {
+    $sqlUpdate = "UPDATE orders_status SET notification = 0 WHERE orders_status_id = ?";
+    $stmtUpdate = $conn->prepare($sqlUpdate);
+    $stmtUpdate->bind_param("i", $orders_status_id);
+    $stmtUpdate->execute();
 }
 ?>
 
@@ -66,8 +82,8 @@ if (empty($status_order)) {
     .container {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        height: 100vh;
+        min-height: 100vh;
+        /* ความสูงอย่างน้อย 100% ของหน้าจอ */
         background: #fff;
         border-radius: 10px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -75,9 +91,12 @@ if (empty($status_order)) {
         padding: 0px 20px;
     }
 
+    .order-content {
+        flex-grow: 1;
+        /* ขยายไปจนสุดพื้นที่ที่เหลือ */
+    }
+
     .details-bottom {
-        position: sticky;
-        bottom: 0;
         background-color: #fff;
         padding: 20px;
     }
@@ -134,10 +153,6 @@ if (empty($status_order)) {
         padding: 10px;
         border-radius: 15px;
         font-size: 1.2rem;
-    }
-
-    .reorder-button:hover {
-        background-color: #ffc107;
     }
 
     .step {
@@ -234,15 +249,19 @@ if (empty($status_order)) {
                 </span>
                 <hr>
                 <ul>
-                    <li style="display: flex; justify-content: space-between;margin-top: 20px;">
-                        <span style="width: 50%;"><?php echo $product_name; ?></span>
+                    <?php foreach ($items as $item) : ?>
+                    <li style="display: flex; justify-content: space-between; margin-top: 20px;">
+                        <span style="width: 50%;"><?php echo $item['product_name']; ?></span>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; width: 25%;">
-                            <span><?php echo number_format($product_price, 2); ?>฿</span>
-                            <span>x<?php echo $quantity; ?></span>
+                            <span><?php echo number_format($item['product_price'], 2); ?>฿</span>
+                            <span>x<?php echo $item['quantity']; ?></span>
                         </div>
                     </li>
-                    <span style="color:#e1e1e1;">หมายเหตุ : <?php echo $item_notes ? $item_notes : '-'; ?></span>
+                    <span style="color:#e1e1e1;">หมายเหตุ :
+                        <?php echo $item['item_notes'] ? $item['item_notes'] : '-'; ?></span>
+                    <?php endforeach; ?>
                 </ul>
+
             </div>
 
         </div>
@@ -274,6 +293,5 @@ if (empty($status_order)) {
 </html>
 
 <?php
-// ปิดการเชื่อมต่อฐานข้อมูล
 $conn->close();
 ?>

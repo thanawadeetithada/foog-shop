@@ -41,15 +41,26 @@ $result = $stmt->get_result();
     }
 
     body {
-        font-family: Arial, sans-serif;
-        background-color: #fff;
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+    main {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 0 1rem;
     }
 
     .container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-    }
+    flex: 1; /* ให้ container ขยายเต็มที่ */
+    display: flex;
+    flex-direction: column;
+}
 
     header {
         padding: 1rem 1rem 0rem 1.8rem;
@@ -60,10 +71,10 @@ $result = $stmt->get_result();
     }
 
     main {
-        flex: 1;
-        overflow-y: auto;
-        padding: 0 1rem;
-    }
+    flex-grow: 1; /* ให้เนื้อหาหลักขยายเต็มที่ */
+    overflow-y: auto;
+    padding: 0 1rem;
+}
 
     .status-item {
         display: flex;
@@ -118,10 +129,19 @@ $result = $stmt->get_result();
         border-radius: 50%;
     }
 
-    footer {
-        background-color: #ffcc33;
-        padding: 0.5rem 0;
-    }
+    .footer {
+    align-items: center;
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 5px 0;
+    width: 90%;
+    margin-left: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 100px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
 
     nav {
         display: flex;
@@ -183,19 +203,17 @@ $result = $stmt->get_result();
 
     /* Footer Section */
     .footer {
-        align-items: center;
-        display: flex;
-        justify-content: space-around;
-        background-color: #fff;
-        padding: 5px 0;
-        position: fixed;
-        bottom: 0;
-        margin-bottom: 20px;
-        width: 90%;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 100px;
-        margin-left: 20px;
-    }
+    align-items: center;
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 5px 0;
+    width: 90%;
+    margin-left: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 100px;
+    margin-bottom: 20px; /* ทำให้ footer มีระยะห่างจากด้านล่าง */
+}
 
     .footer-item {
         text-align: center;
@@ -230,6 +248,7 @@ $result = $stmt->get_result();
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .footer div {
@@ -278,16 +297,16 @@ if ($result->num_rows > 0) {
 
         // ตรวจสอบสถานะออเดอร์
         if ($statusOrder === "receive") {
-            $statusText = '<p class="order">รับออเดอร์แล้ว</p>';
+            $statusText = '<p class="order-confirm">รับออเดอร์แล้วๅ</p>';
         } elseif ($statusOrder === "prepare") {
             $statusText = '<p class="order-prepare">กำลังเตรียม</p>';
         } elseif ($statusOrder === "complete") {
             $statusText = '<p class="order-confirm">เสร็จสิ้นแล้ว</p>';
         } else {
-            $statusText = '<p class="order" style="color: red;">ร้านยังไม่รับออเดอร์</p>';
+            $statusText = '<p class="order-confirm">รับออเดอร์</p>';
         }
 
-        $items_sql = "SELECT GROUP_CONCAT(CONCAT(p.product_name, ' x ', oi.quantity) SEPARATOR '\n') AS product_names
+        $items_sql = "SELECT GROUP_CONCAT(CONCAT(p.product_name, ' x', oi.quantity) SEPARATOR '\n') AS product_names
         FROM orders_status_items oi
         LEFT JOIN products p ON oi.product_id = p.product_id
         WHERE oi.orders_status_id = ?";
@@ -332,7 +351,9 @@ echo "
 <hr>";
     }
 } else {
-    echo "<p>ไม่มีคำสั่งซื้อ</p>";
+    echo "<br>";
+    echo "<p style='margin-left: 1rem;'>ไม่มีคำสั่งซื้อ</p>";
+
 }
 
 $conn->close();
@@ -342,7 +363,7 @@ $conn->close();
 
     </div>
 
-    <footer class="footer">
+    <div class="footer">
         <div class="footer-item " onclick="window.location.href='user_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
@@ -357,8 +378,25 @@ $conn->close();
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
-    </footer>
+    </div>
+    <script>
+    function fetchNotifications() {
+        fetch('get_notifications_user.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
 
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+    </script>
 </body>
 
 </html>

@@ -1,21 +1,13 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit();
-}
+require_once "db.php";
 
 $user_id = $_SESSION['user_id'];
 
-require_once "db.php";
+$order_count = isset($order_count) ? $order_count : 0;
+$preparing_count = isset($preparing_count) ? $preparing_count : 0;
+$completed_count = isset($completed_count) ? $completed_count : 0;
 
-$sql = "SELECT role FROM users WHERE user_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$stmt->bind_result($role);
-$stmt->fetch();
-$stmt->close();
 
 $sql = "SELECT store_name, user_name, store_id FROM stores WHERE user_id = ? LIMIT 1";
 $stmt = $conn->prepare($sql);
@@ -29,40 +21,57 @@ if (empty($store_name)) {
     $store_name = "ไม่พบข้อมูลร้านค้า";
 }
 
-// SQL Query สำหรับดึงข้อมูลตามเงื่อนไขที่กำหนด
-$sql = "
-    SELECT 
-        COUNT(CASE WHEN status_order IS NULL OR status_order = 'receive' THEN 1 END) AS order_count,
-        COUNT(CASE WHEN status_order = 'prepare' THEN 1 END) AS preparing_count,
-        COUNT(CASE WHEN status_order = 'complete' THEN 1 END) AS completed_count
-    FROM orders_status 
-    WHERE store_id = ?"; // ใช้ store_id ตรงกับ user_id ที่ล็อกอินเข้ามา
+$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : null;
+$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : null;
 
-// Prepare และ execute SQL
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $store_id);  // ส่ง store_id ที่ได้จากข้อมูล session
+
+if ($startDate && $endDate) {
+    $sql = "
+        SELECT SUM(total_price) AS total_sales_all
+        FROM orders_status 
+        WHERE store_id = ? AND status_order = 'complete' 
+        AND created_at BETWEEN ? AND ?
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iss", $store_id, $startDate, $endDate);
+} else {
+    // ถ้าไม่มีช่วงวันที่ จะดึงข้อมูลทั้งหมดจากฐานข้อมูล
+    $sql = "
+        SELECT SUM(total_price) AS total_sales_all
+        FROM orders_status 
+        WHERE store_id = ? AND status_order = 'complete'
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $store_id);
+}
+
 $stmt->execute();
-$stmt->bind_result($order_count, $preparing_count, $completed_count);
-$stmt->fetch();
-$stmt->close();
-
-$sql = "
-    SELECT SUM(total_price) AS total_sales
-    FROM orders_status 
-    WHERE store_id = ? AND status_order = 'complete'
-";
-
-// Prepare และ execute SQL
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $store_id);  // ส่ง store_id ที่ได้จากข้อมูล session
-$stmt->execute();
-$stmt->bind_result($total_sales);
+$stmt->bind_result($total_sales_all);
 $stmt->fetch();
 $stmt->close();
 
 $status_order = isset($_GET['status_order']) ? $_GET['status_order'] : '';
 
-$sales_data = [40, 55, 65, 75, 90];
+$sql = "
+    SELECT oi.product_id, p.product_name, SUM(oi.subtotal) AS total_sales
+    FROM orders_status os
+    JOIN orders_status_items oi ON os.orders_status_id = oi.orders_status_id
+    JOIN products p ON oi.product_id = p.product_id
+    WHERE os.store_id = ? AND os.status_order = 'complete'
+    GROUP BY oi.product_id
+";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $store_id);
+$stmt->execute();
+$stmt->bind_result($product_id, $product_name, $total_sales);
+$product_sales = [];
+
+while ($stmt->fetch()) {
+    $product_sales[] = ['product_id' => $product_id, 'product_name' => $product_name, 'total_sales' => $total_sales];
+}
+$stmt->close();
+
+
 ?>
 
 <!DOCTYPE html>
@@ -76,6 +85,10 @@ $sales_data = [40, 55, 65, 75, 90];
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous">
     </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
     <style>
     body {
         background-color: #f8f9fa;
@@ -220,6 +233,8 @@ $sales_data = [40, 55, 65, 75, 90];
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
+        display: none;
     }
 
     .footer div {
@@ -248,6 +263,13 @@ $sales_data = [40, 55, 65, 75, 90];
         font-weight: 400;
         color: black;
     }
+
+    .col-4 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
     </style>
 </head>
 
@@ -273,14 +295,6 @@ $sales_data = [40, 55, 65, 75, 90];
             <div class="col text-start">
                 <p class="store-id">Store_ID <?php echo htmlspecialchars($store_id, ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
-            <?php if ($role == 'admin') : ?>
-            <div class="col text-end">
-                <button
-                    onclick="window.location.href='admin_add_shop.php?store_id=<?php echo htmlspecialchars($store_id, ENT_QUOTES, 'UTF-8'); ?>';">
-                    แก้ไขข้อมูล
-                </button>
-            </div>
-            <?php endif; ?>
         </div>
 
         <div class="row align-items-center">
@@ -295,26 +309,26 @@ $sales_data = [40, 55, 65, 75, 90];
         </div>
 
         <div class="row mt-3">
-            <div class="col-4 d-flex flex-column align-items-center">
+            <div class="col-4">
                 <a href="shop_order.php?status_order=receive" style="text-decoration: none; color: inherit;">
                     <div class="summary-box">
-                        <span><?php echo $order_count; ?></span>
+                        <span class="order-count"><?php echo $order_count; ?></span>
                     </div>
                     <h6>ออเดอร์</h6>
                 </a>
             </div>
-            <div class="col-4 d-flex flex-column align-items-center">
+            <div class="col-4">
                 <a href="shop_order.php?status_order=prepare" style="text-decoration: none; color: inherit;">
                     <div class="summary-box">
-                        <span><?php echo $preparing_count; ?></span>
+                        <span class="preparing-count"><?php echo $preparing_count; ?></span>
                     </div>
                     <h6>ที่ต้องจัดเตรียม</h6>
                 </a>
             </div>
-            <div class="col-4 d-flex flex-column align-items-center">
+            <div class="col-4">
                 <a href="shop_order.php?status_order=complete" style="text-decoration: none; color: inherit;">
                     <div class="summary-box">
-                        <span><?php echo $completed_count; ?></span>
+                        <span class="completed-count"><?php echo $completed_count; ?></span>
                     </div>
                     <h6>เสร็จสิ้นแล้ว</h6>
                 </a>
@@ -328,13 +342,13 @@ $sales_data = [40, 55, 65, 75, 90];
                 <h4>สรุปยอดขาย</h4>
             </div>
             <div class="col text-end">
-                <h5>ระยะเวลา<i class="fa-solid fa-angle-down"></i></h5>
+                <input type="text" id="date-range-picker" value="" class="form-control" />
             </div>
         </div>
         <br>
         <div class="total-sell">
             <p>ยอดขาย (฿) </p>
-            <p><?php echo number_format($total_sales, 2); ?></p>
+            <p id="total-sales">0.00</p> <!-- เปลี่ยนเป็น id เพื่อจะได้อ้างอิงใน JavaScript -->
         </div>
 
         <div class="row mt-3">
@@ -352,37 +366,156 @@ $sales_data = [40, 55, 65, 75, 90];
         </div>
         <div class="footer-item " onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
         </div>
         <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
         </div>
     </footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <script>
+    $(document).ready(function() {
+        // ตรวจสอบให้ `total_sales_all` เป็นตัวเลขหรือ 0
+    var totalSalesAll = <?php echo is_numeric($total_sales_all) ? $total_sales_all : 0; ?>;
+    document.getElementById('total-sales').textContent = parseFloat(totalSalesAll).toFixed(2);
+        $('#date-range-picker').daterangepicker({
+            opens: 'right',
+            locale: {
+                format: 'YYYY-MM-DD'
+            }
+        }, function(start, end, label) {
+            var startDate = start.format('YYYY-MM-DD');
+            var endDate = end.format('YYYY-MM-DD');
+
+            console.log('Selected Date Range:', startDate, endDate);
+
+            fetchSalesData(startDate, endDate);
+        });
+
+    });
+
+
+    var store_id = <?php echo $store_id; ?>;
+
+    function fetchSalesData(startDate, endDate) {
+    console.log(
+        `Requesting sales data with parameters: store_id=${store_id}, start_date=${startDate}, end_date=${endDate}`
+    );
+
+    fetch(`get_sales_data.php?store_id=${store_id}&start_date=${startDate}&end_date=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response data:', data);
+
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+
+            let totalSalesAll = data.total_sales_all;
+
+            // ตรวจสอบค่า totalSalesAll ว่าเป็นตัวเลขหรือไม่
+            if (totalSalesAll === null || totalSalesAll === undefined || isNaN(totalSalesAll)) {
+                totalSalesAll = 0;  // ถ้าไม่ใช่ตัวเลข กำหนดให้เป็น 0
+            } else {
+                totalSalesAll = parseFloat(totalSalesAll); // ถ้าเป็นตัวเลขแปลงเป็น float
+            }
+
+            console.log('Total Sales:', totalSalesAll);
+
+            // แสดงผลยอดขาย
+            document.getElementById('total-sales').textContent = totalSalesAll.toFixed(2);
+
+            const productSales = data.product_sales;
+            updateSalesChart(productSales);
+        })
+        .catch(error => {
+            console.error('Error fetching sales data:', error);
+        });
+}
+
+    function updateSalesChart(data) {
+        var productNames = data.map(item => item.product_name);
+        var salesData = data.map(item => item.total_sales);
+
+        salesChart.data.labels = productNames;
+        salesChart.data.datasets[0].data = salesData;
+        salesChart.update();
+    }
+
+    var productSales = <?php echo json_encode($product_sales); ?>;
+    var productNames = productSales.map(function(item) {
+        return item.product_name;
+    });
+    var salesData = productSales.map(function(item) {
+        return item.total_sales;
+    });
     var ctx = document.getElementById('salesChart').getContext('2d');
     var salesChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['', '', '', '', ''],
+            labels: productNames,
             datasets: [{
                 label: 'ยอดขาย (บาท)',
-                data: <?php echo json_encode($sales_data); ?>,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                data: salesData,
                 borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: true
             }]
         },
         options: {
             scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'สินค้า'
+                    }
+                },
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'ยอดขาย (฿)'
+                    }
                 }
             }
         }
     });
-    </script>
 
-    <!-- FontAwesome สำหรับไอคอน -->
+
+    function fetchNotifications() {
+        fetch('get_notifications_shop.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+
+    function fetchOrderStatus() {
+        fetch('get_order_status.php')
+            .then(response => response.json())
+            .then(data => {
+                document.querySelector('.order-count').textContent = data.order_count || 0;
+                document.querySelector('.preparing-count').textContent = data.preparing_count || 0;
+                document.querySelector('.completed-count').textContent = data.completed_count || 0;
+            })
+            .catch(error => console.error('Error fetching order status:', error));
+    }
+
+    setInterval(fetchOrderStatus, 5000);
+    fetchOrderStatus();
+    </script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 </body>

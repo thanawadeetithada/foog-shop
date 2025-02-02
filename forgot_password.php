@@ -1,3 +1,47 @@
+<?php
+include 'db.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $phone = $_POST['phone'];
+    $new_password = $_POST['new_password'];
+
+    if (!empty($phone) && !empty($new_password)) {
+        $stmt = $conn->prepare("SELECT phone FROM users WHERE phone = ?");
+        $stmt->bind_param("s", $phone);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+
+            $stmt = $conn->prepare("UPDATE users SET password = ? WHERE phone = ?");
+            $stmt->bind_param("ss", $hashed_password, $phone);
+
+            if ($stmt->execute()) {
+                echo "<script>
+                        alert('อัปเดตรหัสผ่านสำเร็จ!');
+                        window.location.href = 'index.php';
+                      </script>";
+            } else {
+                echo "เกิดข้อผิดพลาดในการอัปเดตรหัสผ่าน: " . $stmt->error;
+            }
+        } else {
+            echo "<script>
+                    alert('เบอร์โทรศัพท์ไม่ถูกต้อง');
+                    window.location.href = 'forgot_password.php';
+                  </script>";
+        }
+
+        $stmt->close();
+    } else {
+        echo "กรุณากรอกข้อมูลให้ครบถ้วน";
+    }
+}
+
+$conn->close();
+?>
+
+
 <!DOCTYPE html>
 <html lang="th">
 

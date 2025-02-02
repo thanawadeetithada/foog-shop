@@ -1,3 +1,16 @@
+<?php
+session_start();
+
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+    $store_id = $_SESSION['store_id'];
+
+    echo "<script>console.log('User ID: " . $user_id . " and Store ID: " . $_SESSION['store_id'] . " logged in');</script>";
+} else {
+    header("Location: index.php");
+    exit;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="th">
@@ -8,17 +21,23 @@
     <title>สถานะคำสั่งซื้อ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+
+        * {
+            text-decoration: none;
+        }
     .circle span {
         font-size: 16px;
         color: #333;
         margin-top: 10px;
         padding: 0.2rem 0.5rem;
         border-radius: 15px;
-        
+
     }
+
     .circle .correct {
-    background-color: #FDDF59;
+        background-color: #FDDF59;
     }
+
     body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -84,6 +103,7 @@
         display: flex;
         justify-content: space-between;
         padding: 1.5rem 1rem 0.5rem 1rem;
+        color: black;
 
     }
 
@@ -108,22 +128,6 @@
         margin-bottom: 5px;
     }
 
-    .details .order-prepare {
-        font-size: 1rem;
-        color: #ff7e2e;
-        margin-bottom: 5px;
-    }
-
-    .details .order-confirm {
-        font-size: 1rem;
-        background-color: #4caf50;;
-        margin-bottom: 5px;
-        border: 1px;
-        width: fit-content;
-        border-radius: 15px;
-        padding: 1px 8px;
-        color: black;
-    }
 
     .price {
         font-size: 0.9rem;
@@ -153,15 +157,6 @@
         font-weight: bold;
     }
 
-    .top-tab {
-        width: 100%;
-        padding: 30px;
-        background-color: #FDDF59;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1000;
-    }
 
     .row {
         display: flex;
@@ -177,7 +172,7 @@
 
         text-align: center;
         /* จัดข้อความให้อยู่ตรงกลาง */
-        padding: 0 5px;
+        padding: 0 5px 0 0;
         /* เพิ่มช่องว่างระหว่างคอลัมน์ */
     }
 
@@ -246,6 +241,7 @@
         height: 10px;
         background-color: red;
         border-radius: 50%;
+        display: none;
     }
 
     .footer div {
@@ -304,6 +300,49 @@
     .search-box button i {
         font-size: 16px;
     }
+
+    .order-pending {
+        background-color: red;
+        color: black;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        border: 1px;
+        width: fit-content;
+        border-radius: 15px;
+        padding: 1px 8px;
+    }
+
+    .order-receive {
+        background-color: #7fd854;
+        color: black;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        border: 1px;
+        width: fit-content;
+        border-radius: 15px;
+        padding: 1px 8px;
+    }
+
+    .order-prepare {
+        background-color: #7fd854;
+        color: black;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        border: 1px;
+        width: fit-content;
+        border-radius: 15px;
+        padding: 1px 8px;
+    }
+
+    .order-complete {
+        color: #52bb4d;
+        font-size: 1rem;
+        margin-bottom: 5px;
+        border: 1px;
+        width: fit-content;
+        border-radius: 15px;
+        padding: 1px 8px;
+    }
     </style>
 </head>
 
@@ -315,36 +354,88 @@
 
             <div class="step">
                 <div class="circle">
-                    <span >ออเดอร์</span>
+                    <a href="shop_order.php">
+                        <span>ออเดอร์</span>
+                    </a>
                 </div>
                 <div class="circle">
-                    <span class="correct">ที่ต้องจัดเตรียม</span>
+                    <a href="shop_order_prepare.php">
+                        <span class="correct">ที่ต้องจัดเตรียม</span>
+                    </a>
                 </div>
                 <div class="circle">
-                    <span >เสร็จสิ้น</span>
+                    <a href="shop_order_complete.php">
+                        <span>เสร็จสิ้น</span>
+                    </a>
                 </div>
             </div>
 
             <main>
-                <div class="status-item">
-                    <div class="icon">
-                        <i class="fa-solid fa-utensils"></i>
-                    </div>
-                    <div class="details">
-                        <div class="row">
-                            <span class="column"><strong>16 ธ.ค. 67, 11:45</strong></span>
-                            <span class="column"><strong>Order : 001</strong></span>
-                            <span class="column"><strong>50฿</strong></span>
-                        </div>
-                        <p class="order"><i
-                                class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>ข้าวมันไก่ต้ม</strong>&nbsp;<span>x1</span>
-                        </p>
-                        <p style="margin-bottom: 5px;margin-left:1rem"> หมายเหตุ : - </p>
-                        <p class="order"><i class="fa-solid fa-circle-user"></i>&nbsp;<strong>0616519783</strong></p>
-                        <p class="order-confirm">เสร็จสิ้น</p>
-                    </div>
-                </div>
-                <hr>
+                <?php
+// รวมไฟล์เชื่อมต่อฐานข้อมูล
+include 'db.php';
+$sql = "
+    SELECT o.created_at, o.orders_status_id, o.total_price, p.product_name, osi.notes, o.status_order
+    FROM orders_status o
+    LEFT JOIN orders_status_items osi ON o.orders_status_id = osi.orders_status_id
+    LEFT JOIN products p ON osi.product_id = p.product_id
+    WHERE o.store_id = '" . $store_id . "'  AND o.status_order = 'prepare'
+    ORDER BY o.created_at DESC
+";
+
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        $created_at = date("d M y, H:i", strtotime($row['created_at']));
+        $order_id = $row['orders_status_id'];
+        $total_price = number_format($row['total_price'], 2) . "฿";
+        $product_name = $row['product_name'];
+        $notes = $row['notes'] ? $row['notes'] : '-';
+        $status_order = $row['status_order'];
+
+        $status_class = '';
+        $status_text = '';
+
+        if (empty($status_order) || is_null($status_order)) {
+            $status_text = 'ยังไม่ได้รับออเดอร์';
+            $status_class = 'order-pending';
+        } elseif ($status_order == 'receive') {
+            $status_text = 'รับออเดอร์';
+            $status_class = 'order-receive';
+        } elseif ($status_order == 'prepare') {
+            $status_text = 'กำลังจัดเตรียม';
+            $status_class = 'order-prepare'; 
+        } elseif ($status_order == 'complete') {
+            $status_text = 'เสร็จสิ้นแล้ว';
+            $status_class = 'order-complete';
+        }
+
+        echo '<a href="shop_order_status.php?orders_status_id=' . $order_id . '" class="order-link">';
+        echo '<div class="status-item">';
+        echo '<div class="icon"><i class="fa-solid fa-utensils"></i></div>';
+        echo '<div class="details">';
+        echo '<div class="row">';
+        echo '<span class="column"><strong>' . $created_at . '</strong></span>';
+        echo '<span class="column"><strong>Order : ' . str_pad($order_id, 3, '0', STR_PAD_LEFT) . '</strong></span>';
+        echo '<span class="column"><strong>' . $total_price . '</strong></span>';
+        echo '</div>';
+        echo '<p class="order"><i class="fa-solid fa-bag-shopping"></i>&nbsp;<strong>' . $product_name . '</strong></p>';
+        echo '<p style="margin-bottom: 5px;margin-left:1rem"> หมายเหตุ : ' . $notes . ' </p>';
+        echo '<p class="order-confirm ' . $status_class . '">' . $status_text . '</p>';
+        echo '</div>';
+        echo '</div>';
+        echo '</a>';
+        echo '<hr>';
+    }
+} else {
+    echo '<p style="margin-top: 20px;">ไม่พบข้อมูลคำสั่งซื้อ</p>';
+}
+
+// ปิดการเชื่อมต่อฐานข้อมูล
+$conn->close();
+?>
+
             </main>
 
         </div>
@@ -359,9 +450,32 @@
         </div>
         <div class="footer-item " onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
+            <span class="notification-badge"></span>
         </div>
-        <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
+        <div class="footer-item " onclick="window.location.href='shop_all_product.php'">
             <i class="fa-regular fa-folder-open"></i>
         </div>
     </footer>
+
+    <script>
+    function fetchNotifications() {
+        fetch('get_notifications_shop.php')
+            .then(response => response.json())
+            .then(data => {
+                var hasNotification = data.includes(1);
+                if (hasNotification) {
+                    document.querySelector('.notification-badge').style.display = 'block';
+                } else {
+                    document.querySelector('.notification-badge').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
+
+    fetchNotifications();
+    setInterval(fetchNotifications, 1000);
+    </script>
+
 </body>
+
+</html>

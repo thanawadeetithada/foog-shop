@@ -1,4 +1,79 @@
+<?php
 
+include 'db.php';
+
+$orders_status_id = isset($_GET['orders_status_id']) ? $_GET['orders_status_id'] : 0;
+
+if ($orders_status_id == 0) {
+    echo "ไม่พบคำสั่งซื้อ";
+    exit;
+}
+
+$sql = "
+SELECT 
+    os.created_at, 
+    os.orders_status_id, 
+    os.total_price, 
+    os.payment_method, 
+    os.status_order,
+    osi.quantity,
+    osi.subtotal,
+    osi.notes,
+    p.product_name,
+    u.phone
+FROM 
+    orders_status os
+JOIN 
+    orders_status_items osi ON os.orders_status_id = osi.orders_status_id
+JOIN 
+    products p ON osi.product_id = p.product_id
+JOIN 
+    users u ON os.user_id = u.user_id
+WHERE 
+    os.orders_status_id = ?";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $orders_status_id); // "i" หมายถึง integer
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+// ถ้ามีข้อมูล
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $created_at = date("d M y, H:i", strtotime($row['created_at'])); // แปลงวันที่
+    $total_price = number_format($row['total_price'], 2) . "฿";
+    $payment_method = $row['payment_method'];
+    $status_order = $row['status_order'];
+    $quantity = $row['quantity'];
+    $subtotal = number_format($row['subtotal'], 2) . "฿";
+    $notes = $row['notes'];
+    $product_name = $row['product_name'];
+    $phone = $row['phone'];
+
+    if ($status_order === 'receive') {
+        $status_order_display = 'รับออเดอร์';
+        $button_class = 'green-button';
+    } elseif ($status_order === 'prepare') {
+        $status_order_display = 'เสร็จสิ้น';
+        $button_class = 'green-button';
+    } elseif ($status_order === 'complete') {
+        $status_order_display = 'เรียบร้อย';
+        $button_class = 'gray-button';
+    } else {
+        $status_order_display = 'ยังไม่ได้รับออเดอร์';
+        $button_class = 'red-button';
+    }
+  
+} else {
+    echo "ไม่พบข้อมูลคำสั่งซื้อ";
+    exit;
+}
+
+// ปิดการเชื่อมต่อฐานข้อมูล
+$stmt->close();
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="th">
 
@@ -80,16 +155,11 @@
     .reorder-button {
         display: block;
         text-align: center;
-        background-color: #7ed956;
         color: #333;
         text-decoration: none;
         padding: 10px;
         border-radius: 15px;
         font-size: 1.2rem;
-    }
-
-    .reorder-button:hover {
-        background-color: #ffc107;
     }
 
     .step {
@@ -162,56 +232,76 @@
         padding: 0;
         list-style-type: none;
     }
+
+    .green-button {
+        background-color: #7ed956;
+    }
+
+    .red-button {
+        background-color: #e93125;
+    }
+
+    .gray-button {
+        background-color: #d1cdcc;
+    }
+
+    a:hover {
+        color: inherit; /* คงสีเดิม */
+        text-decoration: none;
+    }
+    
     </style>
 </head>
 
 <body>
     <div class="top-tab">
-    <i class="fa-solid fa-arrow-left"></i>
+        <a href="shop_order.php">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+
     </div>
 
     <div class="container">
         <div class="order-content">
             <div class="header">รายการคำสั่งซื้อ</div>
-            <?php while ($row = $result->fetch_assoc()): ?>
-           
+
+
             <div class="details">
                 <div class="order-info">
-                    <span><strong>16 ธ.ค. 67, 11:45</strong></span>
-                    <span class="order-right"><strong>Order : 001</strong></span>
+                    <span><strong><?php echo $created_at; ?></strong></span>
+                    <span class="order-right"><strong>Order : <?php echo $orders_status_id; ?></strong></span>
                 </div>
                 <span style="display: inline-flex;align-items: center;margin-bottom: 10px;">
                     <i class="fa-solid fa-circle-user" style="margin-right: 5px;"></i>
-                    <strong>0616519783</strong>
+                    <strong><?php echo $phone; ?></strong>
                 </span>
                 <hr>
                 <ul>
                     <li style="display: flex; justify-content: space-between;margin-top: 20px;">
-                        <span style="width: 50%;">ข้าวมันไก่ต้ม</span>
+                        <span style="width: 50%;"><?php echo $product_name; ?></span>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; width: 25%;">
-                            <span>50.00฿</span>
-                            <span>x1</span>
+                            <span><?php echo $subtotal; ?></span>
+                            <span>x<?php echo $quantity; ?></span>
                         </div>
                     </li>
-                    <span style="color:#e1e1e1;">หมายเหตุ : - </span>
+                    <span style="color:#e1e1e1;">หมายเหตุ : <?php echo $notes; ?></span>
                 </ul>
             </div>
-            <?php endwhile; ?>
+
         </div>
 
         <div class="details-bottom">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2 style="margin-bottom: 0px;"><strong>ยอดชำระ</strong></h2>
-                <h2 style="color: red; margin-bottom: 0px;"><strong>50.00฿</strong></h2>
+                <h2 style="color: red; margin-bottom: 0px;"><strong><?php echo $total_price; ?></strong></h2>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <p><strong>วิธีการชำระ</strong></p>
-                <p>QR Promptpay</p>
+                <p><?php echo $payment_method; ?></p>
             </div>
             <hr>
             <br>
-            <a href="#" class="reorder-button">รับออเดอร์</a>
+            <a href="#" class="reorder-button <?php echo $button_class; ?>"><?php echo $status_order_display; ?></a>
         </div>
-
     </div>
 </body>

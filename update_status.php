@@ -29,8 +29,23 @@ if ($orders_status_id > 0) {
         $update_sql = "UPDATE orders_status SET status_order = '$new_status' WHERE orders_status_id = $orders_status_id";
 
         if ($conn->query($update_sql) === TRUE) {
-            // ถ้าอัปเดตสำเร็จ, รีเฟรชหน้าเดิม
-            header("Location: " . $_SERVER['HTTP_REFERER']); // รีเฟรชหน้าปัจจุบัน
+            // ถ้าอัปเดต status_order สำเร็จ และ new_status คือ 'complete'
+            if ($new_status == 'complete') {
+                $sql = "UPDATE orders_status SET notification = 1"; // หรือเพิ่มเงื่อนไข WHERE ตามต้องการ
+
+                // ตรวจสอบว่าอัพเดทสำเร็จหรือไม่
+                if ($conn->query($sql) === TRUE) {
+                    echo "Record updated successfully";
+                } else {
+                    echo "Error updating record: " . $conn->error;
+                }
+                
+                // ปิดการเชื่อมต่อ
+                $conn->close();
+            }
+
+            // รีเฟรชหน้าปัจจุบันหลังจากอัปเดตสำเร็จ
+            header("Location: " . $_SERVER['HTTP_REFERER']);
             exit();
         } else {
             echo "Error updating record: " . $conn->error;

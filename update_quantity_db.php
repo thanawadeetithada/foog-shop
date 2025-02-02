@@ -27,19 +27,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_order_item_id'],
         $cart_order_id = $data['cart_order_id'];
         $quantity = $data['quantity'];
         $product_id = $data['product_id'];
-
-        // ดึงราคาต่อหน่วยของสินค้า
-        $sql_price = "SELECT price FROM products WHERE product_id = ?";
-        $stmt_price = $conn->prepare($sql_price);
-        $stmt_price->bind_param("i", $product_id);
-        $stmt_price->execute();
-        $stmt_price->bind_result($unit_price);
-        $stmt_price->fetch();
-        $stmt_price->close();
+        $old_subtotal = $data['subtotal']; // ค่า subtotal ที่เก็บไว้ใน cart_order_items
 
         // คำนวณค่าใหม่
         $new_quantity = ($action === "increase") ? ($quantity + 1) : max(1, $quantity - 1);
-        $new_subtotal = $new_quantity * $unit_price;
+        $new_subtotal = $old_subtotal / $quantity * $new_quantity; // คำนวณราคาย่อยใหม่โดยใช้ subtotal เก่า
 
         // อัปเดตค่าใหม่ในฐานข้อมูล
         $sql_update = "UPDATE cart_order_items SET quantity = ?, subtotal = ? WHERE cart_order_item_id = ?";
@@ -64,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cart_order_item_id'],
             $stmt_update_order->close();
 
             // ส่งข้อมูลกลับ
-            echo json_encode([
+            echo json_encode([ 
                 "success" => true, 
                 "new_quantity" => $new_quantity, 
                 "new_subtotal" => number_format($new_subtotal, 2), 

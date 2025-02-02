@@ -2,14 +2,19 @@
 session_start(); // เริ่ม session
 include 'db.php'; // เชื่อมต่อฐานข้อมูล
 
+if (isset($_SESSION['store_id'])) {
+    $store_id = $_SESSION['store_id'];
+} else {
+    die('Store ID not set in session.');
+}
+
 $sql = "SELECT orders_status_id, user_id, total_price, status_order, created_at 
         FROM orders_status 
-        WHERE user_id = ? AND store_id = 4 
+        WHERE store_id = ? 
         ORDER BY created_at DESC";
 
-
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("i", $store_id);
 $stmt->execute();
 $result = $stmt->get_result();
 ?>
@@ -37,12 +42,17 @@ $result = $stmt->get_result();
     body {
         font-family: Arial, sans-serif;
         background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        /* ให้ body ครอบคลุมพื้นที่ทั้งหมด */
     }
 
     .container {
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        flex: 1;
+        /* ให้ container ขยายเต็มพื้นที่ที่เหลือ */
     }
 
     header {
@@ -112,11 +122,6 @@ $result = $stmt->get_result();
         border-radius: 50%;
     }
 
-    footer {
-        background-color: #ffcc33;
-        padding: 0.5rem 0;
-    }
-
     nav {
         display: flex;
         justify-content: space-around;
@@ -163,6 +168,7 @@ $result = $stmt->get_result();
 
     .column {
 
+
         text-align: center;
         /* จัดข้อความให้อยู่ตรงกลาง */
         padding: 0 5px;
@@ -182,13 +188,12 @@ $result = $stmt->get_result();
         justify-content: space-around;
         background-color: #fff;
         padding: 5px 0;
-        position: fixed;
-        bottom: 0;
-        margin-bottom: 20px;
         width: 90%;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 100px;
         margin-left: 20px;
+        margin-top: 20px;
+        margin-bottom: 20px;
     }
 
     .footer-item {
@@ -272,16 +277,16 @@ if ($result->num_rows > 0) {
 
         // ตรวจสอบสถานะออเดอร์
         if ($statusOrder === "receive") {
-            $statusText = '<p class="order">รับออเดอร์แล้ว</p>';
+            $statusText = '<p class="order-confirm">รับออเดอร์</p>';
         } elseif ($statusOrder === "prepare") {
             $statusText = '<p class="order-prepare">กำลังเตรียม</p>';
         } elseif ($statusOrder === "complete") {
             $statusText = '<p class="order-confirm">เสร็จสิ้นแล้ว</p>';
         } else {
-            $statusText = '<p class="order" style="color: red;">ร้านยังไม่รับออเดอร์</p>';
+            $statusText = '<p class="order-confirm">รับออเดอร์</p>';
         }
 
-        $items_sql = "SELECT GROUP_CONCAT(CONCAT(p.product_name, ' x ', oi.quantity) SEPARATOR '\n') AS product_names
+        $items_sql = "SELECT GROUP_CONCAT(CONCAT(p.product_name, ' x', oi.quantity) SEPARATOR '\n') AS product_names
         FROM orders_status_items oi
         LEFT JOIN products p ON oi.product_id = p.product_id
         WHERE oi.orders_status_id = ?";
@@ -306,7 +311,7 @@ foreach ($productNamesArray as $index => $productName) {
 }
 
 $clickableClass = 'clickable';
-$orderLink = "onclick=\"window.location.href='user_order_status.php?orders_status_id={$orderId}';\"";
+$orderLink = "onclick=\"window.location.href='shop_order_status.php?orders_status_id={$orderId}';\"";
 
 echo "
 <div class='status-item {$clickableClass}' {$orderLink}>
@@ -336,23 +341,23 @@ $conn->close();
 
     </div>
 
-    <footer class="footer">
-        <div class="footer-item " onclick="window.location.href='user_main.php'">
+    
+    <div class="footer">
+        <div class="footer-item " onclick="window.location.href='shop_main.php'">
             <i class="fa-solid fa-house-chimney"></i>&nbsp;
             <p>HOME</p>
         </div>
-        <div class="footer-item active" onclick="window.location.href='user_order.php'">
+        <div class="footer-item active" onclick="window.location.href='shop_order.php'">
             <i class="fa-solid fa-file-alt"></i>
         </div>
-        <div class="footer-item" onclick="window.location.href='user_cart.php'">
-            <i class="fa-solid fa-cart-shopping"></i>
-        </div>
-        <div class="footer-item notification" onclick="window.location.href='user_notification.php'">
+        <div class="footer-item " onclick="window.location.href='shop_notification.php'">
             <i class="fa-solid fa-bell"></i>
             <span class="notification-badge"></span>
         </div>
-    </footer>
-
+        <div class="footer-item" onclick="window.location.href='shop_all_product.php'">
+            <i class="fa-regular fa-folder-open"></i>
+        </div>
+    </div>
 </body>
 
 </html>
